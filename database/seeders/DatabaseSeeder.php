@@ -15,11 +15,19 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Contas de teste com a password "password". Nunca são criadas em produção.
+        if (app()->isProduction()) {
+            return;
+        }
+
+        User::factory()->admin()->create([
+            'name' => 'Administrador de Teste',
+            'email' => 'admin@ipt.test',
+        ]);
 
         User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'name' => 'Editor de Teste',
+            'email' => 'editor@ipt.test',
         ]);
     }
 }

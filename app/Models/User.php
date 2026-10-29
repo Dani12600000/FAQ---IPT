@@ -5,6 +5,8 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\Papel;
 use Database\Factories\UserFactory;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,7 +15,7 @@ use Illuminate\Notifications\Notifiable;
 
 #[Fillable(['name', 'email', 'password', 'papel'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
@@ -35,5 +37,14 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->papel === Papel::Admin;
+    }
+
+    /**
+     * Só há contas para a equipa do FAQ (não há registo público), por isso
+     * qualquer admin ou editor entra no backoffice.
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return in_array($this->papel, [Papel::Admin, Papel::Editor], true);
     }
 }
