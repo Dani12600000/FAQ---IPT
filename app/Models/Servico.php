@@ -11,6 +11,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 #[Fillable(['nome', 'slug', 'descricao', 'ordem', 'ativo'])]
 class Servico extends Model
 {
+    protected static function booted(): void
+    {
+        // Um serviço novo sem ordem indicada vai para o fim da lista da página inicial.
+        static::creating(function (self $servico): void {
+            $servico->ordem ??= static::max('ordem') + 1;
+        });
+    }
+
     /**
      * Categorias do serviço, pela ordem definida neste serviço.
      *
@@ -19,6 +27,7 @@ class Servico extends Model
     public function categorias(): BelongsToMany
     {
         return $this->belongsToMany(Categoria::class, 'servico_categoria')
+            ->using(ServicoCategoria::class)
             ->withPivot('ordem')
             ->orderByPivot('ordem');
     }

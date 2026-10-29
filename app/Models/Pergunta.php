@@ -20,6 +20,7 @@ class Pergunta extends Model
     public function temas(): BelongsToMany
     {
         return $this->belongsToMany(Tema::class, 'tema_pergunta')
+            ->using(TemaPergunta::class)
             ->withPivot('ordem');
     }
 

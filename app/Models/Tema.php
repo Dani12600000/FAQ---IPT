@@ -19,6 +19,7 @@ class Tema extends Model
     public function categorias(): BelongsToMany
     {
         return $this->belongsToMany(Categoria::class, 'categoria_tema')
+            ->using(CategoriaTema::class)
             ->withPivot('ordem');
     }
 
@@ -30,6 +31,7 @@ class Tema extends Model
     public function perguntas(): BelongsToMany
     {
         return $this->belongsToMany(Pergunta::class, 'tema_pergunta')
+            ->using(TemaPergunta::class)
             ->withPivot('ordem')
             ->orderByPivot('ordem');
     }

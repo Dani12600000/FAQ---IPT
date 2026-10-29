@@ -1,0 +1,40 @@
+<?php
+
+namespace App\Filament\Resources\Perguntas\Schemas;
+
+use App\Filament\Forms\CamposComSlug;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Schema;
+
+class PerguntaForm
+{
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                ...CamposComSlug::make('pergunta', 'Pergunta'),
+                RichEditor::make('resposta')
+                    ->label('Resposta')
+                    ->required()
+                    ->toolbarButtons([
+                        ['bold', 'italic', 'link'],
+                        ['h2', 'h3'],
+                        ['bulletList', 'orderedList'],
+                        ['undo', 'redo'],
+                    ])
+                    ->columnSpanFull(),
+                Select::make('temas')
+                    ->label('Aparece nos temas')
+                    ->relationship('temas', 'nome')
+                    ->multiple()
+                    ->preload()
+                    ->searchable()
+                    ->columnSpanFull(),
+                Toggle::make('publicada')
+                    ->label('Publicada')
+                    ->helperText('Uma pergunta por publicar fica guardada como rascunho e não aparece no site nem na API.'),
+            ]);
+    }
+}

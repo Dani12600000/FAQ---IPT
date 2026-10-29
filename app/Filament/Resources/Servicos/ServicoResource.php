@@ -1,0 +1,60 @@
+<?php
+
+namespace App\Filament\Resources\Servicos;
+
+use App\Filament\Resources\Servicos\Pages\CreateServico;
+use App\Filament\Resources\Servicos\Pages\EditServico;
+use App\Filament\Resources\Servicos\Pages\ListServicos;
+use App\Filament\Resources\Servicos\RelationManagers\CategoriasRelationManager;
+use App\Filament\Resources\Servicos\Schemas\ServicoForm;
+use App\Filament\Resources\Servicos\Tables\ServicosTable;
+use App\Models\Servico;
+use BackedEnum;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Table;
+use UnitEnum;
+
+class ServicoResource extends Resource
+{
+    protected static ?string $model = Servico::class;
+
+    protected static ?string $modelLabel = 'serviço';
+
+    protected static ?string $pluralModelLabel = 'serviços';
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
+    protected static string|UnitEnum|null $navigationGroup = 'Conteúdo';
+
+    protected static ?int $navigationSort = 1;
+
+    protected static ?string $recordTitleAttribute = 'nome';
+
+    public static function form(Schema $schema): Schema
+    {
+        return ServicoForm::configure($schema);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return ServicosTable::configure($table);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            CategoriasRelationManager::class,
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListServicos::route('/'),
+            'create' => CreateServico::route('/create'),
+            'edit' => EditServico::route('/{record}/edit'),
+        ];
+    }
+}

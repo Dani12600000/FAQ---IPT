@@ -56,6 +56,28 @@ class OrdemLigacoesTest extends TestCase
         $this->assertSame(2, $matriculas->temas->last()->pivot->ordem);
     }
 
+    public function test_um_item_ligado_sem_ordem_vai_para_o_fim_da_lista(): void
+    {
+        $tema = Tema::create(['nome' => 'Propinas', 'slug' => 'propinas']);
+        $primeira = $this->pergunta('Primeira?', 'primeira');
+        $segunda = $this->pergunta('Segunda?', 'segunda');
+        $tema->perguntas()->attach($primeira, ['ordem' => 5]);
+
+        // Ligada a partir da própria pergunta, como no backoffice.
+        $segunda->temas()->sync([$tema->id]);
+
+        $this->assertSame(['primeira', 'segunda'], $tema->perguntas()->pluck('slug')->all());
+        $this->assertSame(6, $tema->perguntas()->firstWhere('slug', 'segunda')->pivot->ordem);
+    }
+
+    public function test_um_servico_novo_vai_para_o_fim_da_lista(): void
+    {
+        Servico::create(['nome' => 'Biblioteca', 'slug' => 'biblioteca', 'ordem' => 3]);
+        $novo = Servico::create(['nome' => 'Internacional', 'slug' => 'internacional']);
+
+        $this->assertSame(4, $novo->ordem);
+    }
+
     public function test_as_relacoes_inversas_mostram_onde_cada_item_aparece(): void
     {
         $pergunta = $this->pergunta('Como peço uma certidão?', 'como-peco-uma-certidao');
