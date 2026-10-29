@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Servicos\Schemas;
 
 use App\Filament\Forms\CamposComSlug;
+use App\Models\Servico;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
@@ -13,7 +14,7 @@ class ServicoForm
     {
         return $schema
             ->components([
-                ...CamposComSlug::make('nome', 'Nome'),
+                ...CamposComSlug::make('nome', 'Nome', Servico::SLUGS_RESERVADOS),
                 Textarea::make('descricao')
                     ->label('Descrição')
                     ->rows(3)

@@ -11,6 +11,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 #[Fillable(['nome', 'slug', 'descricao', 'ordem', 'ativo'])]
 class Servico extends Model
 {
+    /**
+     * Endereços de primeiro nível usados pelo próprio site. Um serviço não pode ter
+     * um destes slugs, porque o URL /{servico} ficaria tapado por eles.
+     */
+    public const SLUGS_RESERVADOS = ['admin', 'api', 'p', 'pesquisa', 'up', 'livewire', 'storage', 'css', 'js', 'fonts', 'filament'];
+
     protected static function booted(): void
     {
         // Um serviço novo sem ordem indicada vai para o fim da lista da página inicial.
@@ -38,7 +44,7 @@ class Servico extends Model
     #[Scope]
     protected function ativos(Builder $query): void
     {
-        $query->where('ativo', true);
+        $query->where($query->qualifyColumn('ativo'), true);
     }
 
     /**

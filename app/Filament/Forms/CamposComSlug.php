@@ -13,9 +13,10 @@ use Illuminate\Support\Str;
 class CamposComSlug
 {
     /**
+     * @param  list<string>  $reservados  Slugs que não podem ser usados.
      * @return array<TextInput>
      */
-    public static function make(string $campo, string $label): array
+    public static function make(string $campo, string $label, array $reservados = []): array
     {
         return [
             TextInput::make($campo)
@@ -39,7 +40,11 @@ class CamposComSlug
                 ->required()
                 ->maxLength(255)
                 ->alphaDash()
-                ->unique(ignoreRecord: true),
+                ->unique(ignoreRecord: true)
+                ->notIn($reservados)
+                ->validationMessages([
+                    'not_in' => 'Este endereço está reservado pelo site. Escolha outro.',
+                ]),
         ];
     }
 }
