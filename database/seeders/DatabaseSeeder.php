@@ -15,19 +15,26 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Contas de teste com a password "password". Nunca são criadas em produção.
+        // Contas de teste e conteúdo de exemplo. Nunca são criados em produção.
         if (app()->isProduction()) {
             return;
         }
 
-        User::factory()->admin()->create([
-            'name' => 'Administrador de Teste',
-            'email' => 'admin@ipt.test',
-        ]);
+        // Contas de teste com a password "password".
+        if (! User::where('email', 'admin@ipt.test')->exists()) {
+            User::factory()->admin()->create([
+                'name' => 'Administrador de Teste',
+                'email' => 'admin@ipt.test',
+            ]);
+        }
 
-        User::factory()->create([
-            'name' => 'Editor de Teste',
-            'email' => 'editor@ipt.test',
-        ]);
+        if (! User::where('email', 'editor@ipt.test')->exists()) {
+            User::factory()->create([
+                'name' => 'Editor de Teste',
+                'email' => 'editor@ipt.test',
+            ]);
+        }
+
+        $this->call(ConteudoExemploSeeder::class);
     }
 }
