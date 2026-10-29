@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AvaliacaoController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\PesquisaController;
 use Illuminate\Support\Facades\Route;
@@ -15,6 +16,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [FaqController::class, 'inicio'])->name('faq.inicio');
 Route::get('/pesquisa', PesquisaController::class)->name('faq.pesquisa');
 Route::get('/p/{pergunta}', [FaqController::class, 'canonica'])->name('faq.canonica');
+Route::post('/p/{pergunta}/avaliacao', AvaliacaoController::class)
+    ->middleware('throttle:10,1') // no máximo 10 avaliações por minuto por IP
+    ->name('faq.avaliar');
 
 Route::get('/{servico}', [FaqController::class, 'servico'])->name('faq.servico');
 Route::get('/{servico}/{categoria}', [FaqController::class, 'categoria'])->name('faq.categoria');

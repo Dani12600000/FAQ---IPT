@@ -128,6 +128,26 @@ class NavegacaoPublicaTest extends TestCase
             ->assertDontSee('onclick', false);
     }
 
+    public function test_paginas_de_tema_e_pergunta_tem_json_ld_faqpage(): void
+    {
+        $this->pergunta->update(['resposta' => '<p>Texto com </script><script>alert(1)</script></p>']);
+
+        foreach (['/acao-social/bolsas/candidatura', '/acao-social/bolsas/candidatura/como-me-candidato'] as $url) {
+            $html = $this->get($url)->getContent();
+
+            preg_match('#<script type="application/ld\+json">(.*?)</script>#s', $html, $bloco);
+            $json = json_decode($bloco[1] ?? '', true);
+
+            $this->assertSame('FAQPage', $json['@type'] ?? null, $url);
+            $this->assertSame('Como me candidato?', $json['mainEntity'][0]['name']);
+            $this->assertSame('Answer', $json['mainEntity'][0]['acceptedAnswer']['@type']);
+            $this->assertStringNotContainsString('alert(1)', $bloco[1]);
+        }
+
+        // Páginas sem perguntas não têm a marcação.
+        $this->get('/acao-social')->assertDontSee('application/ld+json', false);
+    }
+
     public function test_um_servico_nao_tapa_o_backoffice(): void
     {
         $this->get('/admin')->assertRedirect('/admin/login');

@@ -1,4 +1,10 @@
 <x-layout :titulo="$tema->nome.' — '.$categoria->nome" :descricao="$tema->descricao ?: 'Perguntas frequentes sobre '.$tema->nome.'.'">
+    <x-slot:head>
+        @if ($perguntas->isNotEmpty())
+            <x-faq-json-ld :perguntas="$perguntas" />
+        @endif
+    </x-slot:head>
+
     <x-breadcrumb :itens="[
         ['label' => $servico->nome, 'url' => route('faq.servico', $servico->slug)],
         ['label' => $categoria->nome, 'url' => route('faq.categoria', [$servico->slug, $categoria->slug])],

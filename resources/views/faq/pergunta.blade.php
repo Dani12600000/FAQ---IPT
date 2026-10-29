@@ -11,6 +11,11 @@
     :descricao="Str::limit($pergunta->resposta_texto, 155)"
     :canonico="route('faq.canonica', $pergunta->slug)"
 >
+    <x-slot:head>
+        <script src="{{ asset('js/avaliacao.js') }}" defer></script>
+        <x-faq-json-ld :perguntas="collect([$pergunta])" />
+    </x-slot:head>
+
     @if ($caminho)
         <x-breadcrumb :itens="[
             ['label' => $caminho['servico']->nome, 'url' => route('faq.servico', $caminho['servico']->slug)],
@@ -30,6 +35,8 @@
             {!! $pergunta->respostaSegura() !!}
         </div>
     </article>
+
+    <x-avaliacao :pergunta="$pergunta" />
 
     @if ($outrosCaminhos->isNotEmpty())
         <section class="tambem" aria-labelledby="titulo-tambem">

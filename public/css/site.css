@@ -328,6 +328,45 @@ main:focus {
     padding-left: 1.5rem;
 }
 
+.avaliacao {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--cor-borda);
+}
+
+.avaliacao h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1.1rem;
+}
+
+.avaliacao-botoes {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.avaliacao-botoes button {
+    font: inherit;
+    min-width: 5rem;
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--cor-primaria);
+    border-radius: var(--raio);
+    background: var(--cor-fundo);
+    color: var(--cor-primaria);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.avaliacao-botoes button:hover {
+    background: var(--cor-primaria);
+    color: #fff;
+}
+
+/* Fica sempre no documento (mesmo vazio) para os leitores de ecrã anunciarem a mensagem. */
+.avaliacao-estado {
+    margin: 0.5rem 0 0;
+    font-weight: 700;
+}
+
 .tambem {
     margin-top: 2.5rem;
     padding: 1rem 1.25rem;
