@@ -147,7 +147,7 @@ GET /api/pesquisa?q=
 ## Forma de trabalhar
 
 - O Daniel está a aprender Laravel e Filament neste projeto. Explica as decisões e os conceitos do Laravel quando aparecem pela primeira vez.
-- Commits pequenos e com mensagens claras.
+- Commits pequenos e com mensagens claras, no formato [Conventional Commits](https://www.conventionalcommits.org/) e **em inglês** (por exemplo `feat: add question preview`, `fix: keep slug when editing`, `docs: add install steps`).
 - Testes (Pest ou PHPUnit) pelo menos para:
   - a validação da cadeia de URLs;
   - a ordem nas tabelas de ligação;
