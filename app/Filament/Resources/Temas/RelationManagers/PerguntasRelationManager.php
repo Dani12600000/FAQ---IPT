@@ -26,7 +26,7 @@ class PerguntasRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->description('Use "Reordenar" para mudar a ordem das perguntas neste tema.')
+            ->description('Para mudar a ordem das perguntas neste tema, carregue no botão "Reordenar registos" (as setas) e arraste as linhas.')
             ->recordTitleAttribute('pergunta')
             ->reorderable('ordem')
             ->recordUrl(fn (Pergunta $record): string => PerguntaResource::getUrl('edit', ['record' => $record]))

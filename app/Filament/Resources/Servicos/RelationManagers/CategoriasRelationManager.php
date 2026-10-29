@@ -26,7 +26,7 @@ class CategoriasRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->description('Use "Reordenar" para mudar a ordem das categorias neste serviço.')
+            ->description('Para mudar a ordem das categorias neste serviço, carregue no botão "Reordenar registos" (as setas) e arraste as linhas.')
             ->recordTitleAttribute('nome')
             ->reorderable('ordem')
             ->recordUrl(fn (Categoria $record): string => CategoriaResource::getUrl('edit', ['record' => $record]))

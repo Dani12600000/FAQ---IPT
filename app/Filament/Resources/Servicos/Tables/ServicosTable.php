@@ -15,7 +15,7 @@ class ServicosTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->description('A ordem desta lista é a ordem dos serviços na página inicial. Use "Reordenar" para a mudar.')
+            ->description('A ordem desta lista é a ordem dos serviços na página inicial. Para a mudar, carregue no botão "Reordenar registos" (as setas) e arraste as linhas.')
             ->reorderable('ordem')
             ->defaultSort('ordem')
             ->columns([

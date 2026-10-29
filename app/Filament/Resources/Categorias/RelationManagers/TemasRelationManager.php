@@ -26,7 +26,7 @@ class TemasRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->description('Use "Reordenar" para mudar a ordem dos temas nesta categoria.')
+            ->description('Para mudar a ordem dos temas nesta categoria, carregue no botão "Reordenar registos" (as setas) e arraste as linhas.')
             ->recordTitleAttribute('nome')
             ->reorderable('ordem')
             ->recordUrl(fn (Tema $record): string => TemaResource::getUrl('edit', ['record' => $record]))
