@@ -2,12 +2,14 @@
 
 namespace App\Enums;
 
-enum Papel: string
+use Filament\Support\Contracts\HasLabel;
+
+enum Papel: string implements HasLabel
 {
     case Admin = 'admin';
     case Editor = 'editor';
 
-    public function label(): string
+    public function getLabel(): string
     {
         return match ($this) {
             self::Admin => 'Administrador',
