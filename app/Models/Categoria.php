@@ -42,7 +42,7 @@ class Categoria extends Model
     #[Scope]
     protected function ativas(Builder $query): void
     {
-        $query->where('ativo', true);
+        $query->where($query->qualifyColumn('ativo'), true);
     }
 
     /**
