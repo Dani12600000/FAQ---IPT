@@ -3,12 +3,14 @@
 namespace App\Http\Resources;
 
 use App\Models\Servico;
+use Dedoc\Scramble\Attributes\SchemaName;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * @mixin Servico
  */
+#[SchemaName('Servico')]
 class ServicoResource extends JsonResource
 {
     /**

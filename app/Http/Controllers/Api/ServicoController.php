@@ -5,13 +5,22 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ServicoResource;
 use App\Models\Servico;
+use Dedoc\Scramble\Attributes\Group;
+use Dedoc\Scramble\Attributes\PathParameter;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
+// Os atributos #[Group], #[PathParameter], ... e os comentários dos métodos alimentam a
+// documentação da API em /docs/api (gerada pelo Scramble).
+#[Group('Serviços', weight: 1)]
 class ServicoController extends Controller
 {
     /**
-     * GET /api/servicos — serviços ativos, pela ordem da página inicial.
+     * Listar serviços
+     *
+     * Serviços ativos, pela ordem da página inicial. Não inclui as categorias:
+     * para a árvore completa de um serviço, usar `GET /servicos/{servico}`.
      */
     public function index(): AnonymousResourceCollection
     {
@@ -19,9 +28,14 @@ class ServicoController extends Controller
     }
 
     /**
-     * GET /api/servicos/{servico} — árvore completa: categorias → temas → perguntas,
-     * só com o que está ativo/publicado e pela ordem definida em cada ligação.
+     * Árvore de um serviço
+     *
+     * Árvore completa: categorias → temas → perguntas, só com o que está
+     * ativo/publicado e pela ordem definida em cada ligação (campo `ordem`).
+     *
+     * @throws ModelNotFoundException se o serviço não existir ou estiver inativo.
      */
+    #[PathParameter('servico', description: 'Slug do serviço.', example: 'biblioteca')]
     public function show(string $servico): ServicoResource
     {
         $servico = Servico::ativos()

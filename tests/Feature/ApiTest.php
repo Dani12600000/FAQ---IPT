@@ -117,6 +117,26 @@ class ApiTest extends TestCase
             ->assertHeader('Access-Control-Allow-Origin', '*');
     }
 
+    public function test_a_documentacao_da_api_esta_disponivel_fora_do_ambiente_local(): void
+    {
+        $this->assertFalse($this->app->environment('local'));
+
+        $this->get('/docs/api')
+            ->assertOk()
+            ->assertSee('API do FAQ do IPT');
+    }
+
+    public function test_a_especificacao_openapi_descreve_todos_os_endpoints(): void
+    {
+        $especificacao = $this->getJson('/docs/api.json')->assertOk();
+
+        $this->assertSame(
+            ['/servicos', '/servicos/{servico}', '/perguntas/{pergunta}', '/pesquisa'],
+            array_keys($especificacao->json('paths')),
+        );
+        $especificacao->assertJsonPath('paths./pesquisa.get.parameters.0.name', 'q');
+    }
+
     private function pergunta(string $texto, string $slug, bool $publicada = true): Pergunta
     {
         return Pergunta::create([

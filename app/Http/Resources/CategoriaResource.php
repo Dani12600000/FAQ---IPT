@@ -3,12 +3,14 @@
 namespace App\Http\Resources;
 
 use App\Models\Categoria;
+use Dedoc\Scramble\Attributes\SchemaName;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * @mixin Categoria
  */
+#[SchemaName('Categoria')]
 class CategoriaResource extends JsonResource
 {
     /**
@@ -23,7 +25,7 @@ class CategoriaResource extends JsonResource
             'nome' => $this->nome,
             'descricao' => $this->descricao,
             // Posição dentro do serviço (só quando a categoria vem de um serviço).
-            'ordem' => $this->whenPivotLoaded('servico_categoria', fn () => $this->pivot->ordem),
+            'ordem' => $this->whenPivotLoaded('servico_categoria', fn (): int => $this->pivot->ordem),
             'temas' => TemaResource::collection($this->whenLoaded('temas')),
         ];
     }

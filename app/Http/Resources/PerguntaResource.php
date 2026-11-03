@@ -3,12 +3,14 @@
 namespace App\Http\Resources;
 
 use App\Models\Pergunta;
+use Dedoc\Scramble\Attributes\SchemaName;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * @mixin Pergunta
  */
+#[SchemaName('Pergunta')]
 class PerguntaResource extends JsonResource
 {
     /**
@@ -25,7 +27,7 @@ class PerguntaResource extends JsonResource
             'resposta_texto' => $this->resposta_texto,
             'url' => route('faq.canonica', $this->slug),
             // Posição dentro do tema (só quando a pergunta vem de um tema).
-            'ordem' => $this->whenPivotLoaded('tema_pergunta', fn () => $this->pivot->ordem),
+            'ordem' => $this->whenPivotLoaded('tema_pergunta', fn (): int => $this->pivot->ordem),
             // Onde a pergunta aparece no site (só no detalhe da pergunta).
             'caminhos' => $this->when($request->routeIs('api.perguntas.show'), fn () => $this->caminhos()->map(fn (array $c) => [
                 'servico' => ['slug' => $c['servico']->slug, 'nome' => $c['servico']->nome],

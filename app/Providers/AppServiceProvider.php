@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Dedoc\Scramble\Scramble;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Support\ServiceProvider;
@@ -13,7 +14,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // As rotas da documentação da API (/docs/api) são registadas em routes/web.php,
+        // antes das rotas com caminho, que de outra forma as tapavam.
+        Scramble::ignoreDefaultRoutes();
     }
 
     /**

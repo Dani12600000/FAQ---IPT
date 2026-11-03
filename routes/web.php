@@ -3,6 +3,7 @@
 use App\Http\Controllers\AvaliacaoController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\PesquisaController;
+use Dedoc\Scramble\Scramble;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -12,6 +13,10 @@ use Illuminate\Support\Facades\Route;
 | endereço de um só nível. Os slugs de serviços não podem coincidir com os
 | endereços reservados (ver App\Models\Servico::SLUGS_RESERVADOS).
 */
+
+// Documentação da API (Scramble): página interativa e especificação OpenAPI em JSON.
+Scramble::registerUiRoute('docs/api')->name('scramble.docs.ui');
+Scramble::registerJsonSpecificationRoute('docs/api.json')->name('scramble.docs.document');
 
 Route::get('/', [FaqController::class, 'inicio'])->name('faq.inicio');
 Route::get('/pesquisa', PesquisaController::class)->name('faq.pesquisa');
