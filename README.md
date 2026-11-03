@@ -86,6 +86,7 @@ Pré-requisitos: PHP 8.3+, [Composer](https://getcomposer.org), Git e MySQL 8.4.
    - Site público: <http://localhost:8000>
    - Backoffice: <http://localhost:8000/admin>
    - API: <http://localhost:8000/api/servicos>
+   - Documentação da API: <http://localhost:8000/docs/api>
 
 Para recomeçar do zero (apaga **todos** os dados): `php artisan migrate:fresh --seed`.
 
@@ -178,7 +179,7 @@ O URL guarda o caminho por onde a pessoa chegou:
 - **Sem JavaScript tudo funciona:** a pesquisa envia o formulário e o "foi útil?" recarrega a página.
 - **Acessibilidade:** ligação "Saltar para o conteúdo", foco visível, acordeão com `<details>` (funciona com teclado), número de resultados anunciado aos leitores de ecrã e contraste AA.
 
-**Slugs reservados:** como `/{servico}` ocupa o primeiro nível do endereço, um serviço não pode ter o slug `admin`, `api`, `p`, `pesquisa`, `up`, `livewire`, `storage`, `css`, `js`, `fonts` ou `filament`. O backoffice recusa estes slugs (lista em `Servico::SLUGS_RESERVADOS`). Se se criar uma nova rota de primeiro nível em `routes/web.php`, é preciso acrescentá-la a essa lista.
+**Slugs reservados:** como `/{servico}` ocupa o primeiro nível do endereço, um serviço não pode ter o slug `admin`, `api`, `p`, `pesquisa`, `up`, `livewire`, `storage`, `css`, `js`, `fonts`, `filament` ou `docs`. O backoffice recusa estes slugs (lista em `Servico::SLUGS_RESERVADOS`). Se se criar uma nova rota de primeiro nível em `routes/web.php`, é preciso acrescentá-la a essa lista.
 
 ## Backoffice
 
@@ -204,6 +205,20 @@ Pública, só de leitura, com o prefixo `/api`. Só devolve conteúdo ativo/publ
 | `GET /api/pesquisa?q={termo}` | perguntas com todas as palavras do termo (mínimo 2 caracteres, máximo 20 resultados) |
 
 Os identificadores são os **slugs**. Um slug que não exista, ou que esteja inativo, dá 404 com `{"message": "..."}`.
+
+### Documentação interativa (OpenAPI / Swagger)
+
+Em **<http://localhost:8000/docs/api>** há uma página com todos os pedidos, os parâmetros e o formato das respostas, e um botão **"Send API Request"** para os experimentar ali mesmo. A especificação **OpenAPI 3.1** (o formato do Swagger) está em `/docs/api.json` e pode ser importada no Postman, Insomnia ou Swagger Editor.
+
+É gerada automaticamente a partir do código pelo pacote [Scramble](https://scramble.dedoc.co): lê as rotas de `routes/api.php`, os controladores e as API Resources, por isso **não há um ficheiro de documentação para manter à mão**. Para mudar o que aparece:
+
+- **Título e descrição de cada pedido:** o comentário PHPDoc do método do controlador (a 1.ª linha é o título, o resto é a descrição).
+- **Grupos** (Serviços, Perguntas, Pesquisa): atributo `#[Group]` no controlador.
+- **Parâmetros:** atributos `#[PathParameter]` e `#[QueryParameter]` no método.
+- **Campos da resposta:** deduzidos do `toArray()` de cada API Resource; os comentários por cima de um campo aparecem como descrição.
+- **Título, versão e texto da página inicial:** `config/scramble.php`.
+
+A documentação está aberta a todos, porque a API também é pública (ver `middleware` em `config/scramble.php`). As rotas `/docs/api` e `/docs/api.json` estão no topo de `routes/web.php` para não serem apanhadas por `/{servico}/{categoria}`. Para confirmar que a documentação reconhece todos os pedidos: `php artisan scramble:analyze`.
 
 Exemplo, `GET /api/perguntas/como-renovo-um-emprestimo`:
 
