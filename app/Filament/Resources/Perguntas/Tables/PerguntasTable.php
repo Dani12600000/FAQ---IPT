@@ -23,6 +23,7 @@ class PerguntasTable
             ->columns([
                 TextColumn::make('pergunta')
                     ->label('Pergunta')
+                    ->description(fn (Pergunta $record): ?string => $record->origem ? "Versão própria de «{$record->origem->pergunta}»" : null)
                     ->searchable()
                     ->wrap(),
                 TextColumn::make('servico.nome')

@@ -8,9 +8,11 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 #[Fillable(['servico_id', 'pergunta', 'slug', 'resposta', 'publicada'])]
@@ -66,6 +68,127 @@ class Pergunta extends Model
         // Grava sem eventos, para registar a versão uma só vez e com a nota certa.
         $this->saveQuietly();
         $this->registarVersao("Reposição da versão {$versao->numero}");
+    }
+
+    /**
+     * Número da versão mais recente (a do texto atual).
+     */
+    public function versaoAtual(): int
+    {
+        return (int) $this->versoes()->max('numero');
+    }
+
+    /**
+     * Pergunta de onde esta nasceu, quando é a versão própria de um serviço.
+     *
+     * @return BelongsTo<Pergunta, $this>
+     */
+    public function origem(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'origem_id');
+    }
+
+    /**
+     * Versões próprias que outros serviços criaram a partir desta pergunta.
+     *
+     * @return HasMany<Pergunta, $this>
+     */
+    public function derivadas(): HasMany
+    {
+        return $this->hasMany(self::class, 'origem_id');
+    }
+
+    /**
+     * Cria a versão própria de um serviço: uma cópia desta pergunta, desse serviço, que a
+     * substitui nos temas do serviço (na mesma posição). A original não muda para os outros.
+     * Fica registada a versão da original em que as duas eram iguais (a base comum).
+     */
+    public function derivarPara(Servico $servico): self
+    {
+        return DB::transaction(function () use ($servico): self {
+            $copia = new self([
+                'servico_id' => $servico->id,
+                'pergunta' => $this->pergunta,
+                'slug' => static::slugLivre("{$this->slug}-{$servico->slug}"),
+                'resposta' => $this->resposta,
+                'publicada' => $this->publicada,
+            ]);
+            $copia->origem_id = $this->id;
+            $copia->origem_versao = $this->versaoAtual();
+            // Sem eventos, para a versão 1 da cópia dizer de onde veio.
+            $copia->saveQuietly();
+            $copia->registarVersao("Criada a partir de «{$this->pergunta}» (versão {$copia->origem_versao})");
+
+            foreach ($this->temas()->where('temas.servico_id', $servico->id)->get() as $tema) {
+                $tema->perguntas()->detach($this);
+                $tema->perguntas()->attach($copia, ['ordem' => $tema->pivot->ordem]);
+            }
+
+            return $copia;
+        });
+    }
+
+    /**
+     * Se a original mudou desde que esta se separou dela (ou desde a última vez que se viram as alterações).
+     */
+    public function origemMudou(): bool
+    {
+        return $this->origem !== null && $this->origem->versaoAtual() > $this->origem_versao;
+    }
+
+    /**
+     * Copia o texto atual da original para esta pergunta. Fica como uma versão nova.
+     */
+    public function trazerAlteracoesDaOrigem(): void
+    {
+        $this->fill(['pergunta' => $this->origem->pergunta, 'resposta' => $this->origem->resposta]);
+        $this->origem_versao = $this->origem->versaoAtual();
+        $this->saveQuietly();
+        $this->registarVersao("Texto trazido da original (versão {$this->origem_versao})");
+    }
+
+    /**
+     * Mantém o texto desta pergunta e dá por vistas as alterações da original.
+     */
+    public function ignorarAlteracoesDaOrigem(): void
+    {
+        $this->origem_versao = $this->origem->versaoAtual();
+        $this->saveQuietly();
+    }
+
+    /**
+     * Deixa de usar esta versão própria: onde ela aparece passa a aparecer a original, e esta
+     * fica por publicar e sem temas, com o seu histórico (pode ser apagada depois).
+     */
+    public function voltarAOrigem(): void
+    {
+        DB::transaction(function (): void {
+            foreach ($this->temas as $tema) {
+                if (! $this->origem->temas()->whereKey($tema->id)->exists()) {
+                    $tema->perguntas()->attach($this->origem, ['ordem' => $tema->pivot->ordem]);
+                }
+
+                $tema->perguntas()->detach($this);
+            }
+
+            $this->publicada = false;
+            $this->saveQuietly();
+            $this->registarVersao("Substituída pela original «{$this->origem->pergunta}»");
+        });
+    }
+
+    /**
+     * O slug pedido ou, se já existir, o mesmo com -2, -3...
+     */
+    private static function slugLivre(string $slug): string
+    {
+        $livre = $slug;
+
+        for ($i = 2; static::where('slug', $livre)->exists(); $i++) {
+            $livre = "{$slug}-{$i}";
+        }
+
+        return $livre;
     }
 
     /**
@@ -195,6 +318,7 @@ class Pergunta extends Model
     {
         return [
             'publicada' => 'boolean',
+            'origem_versao' => 'integer',
         ];
     }
 }
