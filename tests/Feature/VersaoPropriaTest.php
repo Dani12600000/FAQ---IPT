@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Filament\Resources\Perguntas\Pages\EditPergunta;
+use App\Filament\Resources\Perguntas\Pages\ListPerguntas;
 use App\Filament\Resources\Temas\Pages\EditTema;
 use App\Filament\Resources\Temas\RelationManagers\PerguntasRelationManager;
 use App\Models\Pergunta;
@@ -113,6 +114,45 @@ class VersaoPropriaTest extends TestCase
         $this->assertFalse($copia->publicada);
         $this->assertSame(0, $copia->temas()->count());
         $this->assertSame(2, $copia->versoes()->count());
+    }
+
+    public function test_tambem_se_cria_na_lista_de_perguntas(): void
+    {
+        $this->actingAs($this->editorDe($this->acaoSocial));
+
+        Livewire::test(ListPerguntas::class)
+            // Uma pergunta do seu serviço edita-se diretamente.
+            ->assertTableActionHidden('criarVersaoPropria', Pergunta::firstWhere('slug', 'outra'))
+            ->callTableAction('criarVersaoPropria', $this->original)
+            ->assertHasNoTableActionErrors();
+
+        $copia = Pergunta::where('origem_id', $this->original->id)->sole();
+        $this->assertSame($this->acaoSocial->id, $copia->servico_id);
+        $this->assertSame(['outra', $copia->slug], $this->temaAcaoSocial->perguntas()->pluck('slug')->all());
+    }
+
+    public function test_quem_tem_varios_servicos_escolhe_para_qual_e_a_copia(): void
+    {
+        $internacional = Servico::create(['nome' => 'Internacional', 'slug' => 'internacional']);
+        $temaInternacional = Tema::create(['servico_id' => $internacional->id, 'nome' => 'Partida', 'slug' => 'partida']);
+        $temaInternacional->perguntas()->attach($this->original);
+
+        $editor = $this->editorDe($this->acaoSocial);
+        $editor->servicos()->attach($internacional);
+        $this->actingAs($editor);
+
+        Livewire::test(ListPerguntas::class)
+            ->mountTableAction('criarVersaoPropria', $this->original)
+            ->assertTableActionDataSet(['servico_id' => null])
+            ->setTableActionData(['servico_id' => $internacional->id])
+            ->callMountedTableAction()
+            ->assertHasNoTableActionErrors();
+
+        $copia = Pergunta::where('origem_id', $this->original->id)->sole();
+        $this->assertSame($internacional->id, $copia->servico_id);
+        // Na Ação Social continua a original.
+        $this->assertTrue($this->temaAcaoSocial->perguntas()->whereKey($this->original)->exists());
+        $this->assertTrue($temaInternacional->perguntas()->whereKey($copia)->exists());
     }
 
     public function test_o_editor_cria_a_versao_propria_no_seu_tema(): void

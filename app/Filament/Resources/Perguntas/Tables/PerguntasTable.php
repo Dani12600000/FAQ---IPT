@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Perguntas\Tables;
 
+use App\Filament\Resources\Perguntas\Actions\CriarVersaoPropriaAction;
 use App\Models\Pergunta;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -59,6 +60,8 @@ class PerguntasTable
             ])
             ->recordActions([
                 EditAction::make(),
+                // Para as perguntas de outro serviço que a pessoa usa nos seus temas.
+                CriarVersaoPropriaAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

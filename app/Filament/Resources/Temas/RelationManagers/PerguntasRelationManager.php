@@ -2,16 +2,14 @@
 
 namespace App\Filament\Resources\Temas\RelationManagers;
 
+use App\Filament\Resources\Perguntas\Actions\CriarVersaoPropriaAction;
 use App\Filament\Resources\Perguntas\PerguntaResource;
 use App\Models\Pergunta;
-use Filament\Actions\Action;
 use Filament\Actions\AttachAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
-use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -55,30 +53,8 @@ class PerguntasRelationManager extends RelationManager
                     ->preloadRecordSelect(),
             ])
             ->recordActions([
-                Action::make('criarVersaoPropria')
-                    ->label('Criar versão própria')
-                    ->icon(Heroicon::OutlinedDocumentDuplicate)
-                    ->color('gray')
-                    ->requiresConfirmation()
-                    ->modalHeading('Criar uma versão própria desta pergunta?')
-                    ->modalDescription(fn (): string => 'Fica uma cópia da pergunta e da resposta, de '.$this->getOwnerRecord()->servico->nome.', '
-                        .'no lugar da original nos temas deste serviço. A original continua igual para os outros serviços. '
-                        .'Depois pode alterar a cópia, compará-la com a original e trazer as alterações dela.')
-                    ->modalSubmitActionLabel('Criar versão própria')
-                    // Só para perguntas de outro serviço (as do serviço do tema editam-se diretamente).
-                    ->visible(fn (Pergunta $record): bool => $this->getOwnerRecord()->servico_id !== null
-                        && $record->servico_id !== $this->getOwnerRecord()->servico_id)
-                    ->action(function (Pergunta $record): void {
-                        $copia = $record->derivarPara($this->getOwnerRecord()->servico);
-
-                        Notification::make()
-                            ->success()
-                            ->title('Versão própria criada')
-                            ->body('Já pode alterar a pergunta e a resposta. A original não mudou.')
-                            ->send();
-
-                        $this->redirect(PerguntaResource::getUrl('edit', ['record' => $copia]));
-                    }),
+                // Aqui a cópia é sempre para o serviço deste tema.
+                CriarVersaoPropriaAction::make(fn () => $this->getOwnerRecord()->servico),
                 DetachAction::make()
                     ->label('Retirar'),
             ])
