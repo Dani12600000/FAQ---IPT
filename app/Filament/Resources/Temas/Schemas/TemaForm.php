@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\Temas\Schemas;
 
 use App\Filament\Forms\CamposComSlug;
-use Filament\Forms\Components\Select;
+use App\Filament\Forms\CampoServicoResponsavel;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
@@ -19,13 +19,8 @@ class TemaForm
                     ->label('Descrição')
                     ->rows(3)
                     ->columnSpanFull(),
-                Select::make('categorias')
-                    ->label('Aparece nas categorias')
-                    ->relationship('categorias', 'nome')
-                    ->multiple()
-                    ->preload()
-                    ->searchable()
-                    ->columnSpanFull(),
+                CampoServicoResponsavel::make(),
+                CampoServicoResponsavel::ligacoes('categorias', 'nome', 'Aparece nas categorias', 'as categorias'),
                 Toggle::make('ativo')
                     ->label('Ativo')
                     ->helperText('Um tema inativo não aparece no site nem na API.')

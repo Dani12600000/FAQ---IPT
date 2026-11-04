@@ -48,6 +48,29 @@ class Servico extends Model
     }
 
     /**
+     * Pessoas (editores) que gerem o conteúdo deste serviço.
+     *
+     * @return BelongsToMany<User, $this>
+     */
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class);
+    }
+
+    /**
+     * Só os serviços que a pessoa pode gerir (todos, no caso do administrador).
+     */
+    #[Scope]
+    protected function geridosPor(Builder $query, User $user): void
+    {
+        if ($user->isAdmin()) {
+            return;
+        }
+
+        $query->whereIn($query->qualifyColumn('id'), $user->servicos->modelKeys());
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

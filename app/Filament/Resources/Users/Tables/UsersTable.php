@@ -24,6 +24,10 @@ class UsersTable
                 TextColumn::make('papel')
                     ->label('Papel')
                     ->badge(),
+                TextColumn::make('servicos.nome')
+                    ->label('Serviços')
+                    ->badge()
+                    ->placeholder('—'),
                 TextColumn::make('created_at')
                     ->label('Criado em')
                     ->dateTime()

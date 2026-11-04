@@ -25,7 +25,7 @@ trait MostraUtilidadeDasPerguntas
             ->paginated([5, 10])
             ->defaultPaginationPageOption(5)
             ->emptyStateHeading('Ainda não há avaliações')
-            ->recordUrl(fn (Pergunta $record): string => PerguntaResource::getUrl('edit', ['record' => $record]))
+            ->recordUrl(fn (Pergunta $record): ?string => auth()->user()->can('update', $record) ? PerguntaResource::getUrl('edit', ['record' => $record]) : null)
             ->columns([
                 TextColumn::make('pergunta')
                     ->label('Pergunta')
@@ -46,12 +46,13 @@ trait MostraUtilidadeDasPerguntas
     /**
      * Perguntas com pelo menos uma avaliação, com as contagens de "sim" e "não", o total e
      * a percentagem de "sim". As subconsultas fazem destes valores colunas de "perguntas",
-     * para se poder ordenar por elas.
+     * para se poder ordenar por elas. Um editor só vê as perguntas que usa nos seus serviços.
      */
     public static function perguntasAvaliadas(): Builder
     {
         $contagens = Pergunta::query()
             ->select('perguntas.*')
+            ->visiveisPara(auth()->user())
             ->has('avaliacoes')
             ->withCount([
                 'avaliacoes as sim' => fn (Builder $q) => $q->where('util', true),

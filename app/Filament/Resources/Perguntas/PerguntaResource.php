@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 
 class PerguntaResource extends Resource
@@ -30,6 +31,14 @@ class PerguntaResource extends Resource
     protected static ?int $navigationSort = 4;
 
     protected static ?string $recordTitleAttribute = 'pergunta';
+
+    /**
+     * Um editor vê as perguntas do seu serviço e as de outros serviços que usa nos seus temas.
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->visiveisPara(auth()->user());
+    }
 
     public static function form(Schema $schema): Schema
     {

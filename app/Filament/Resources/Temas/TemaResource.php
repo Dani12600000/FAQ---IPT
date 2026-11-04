@@ -14,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 
 class TemaResource extends Resource
@@ -31,6 +32,14 @@ class TemaResource extends Resource
     protected static ?int $navigationSort = 3;
 
     protected static ?string $recordTitleAttribute = 'nome';
+
+    /**
+     * Um editor vê os temas do seu serviço e os que usa nas suas categorias.
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->visiveisPara(auth()->user());
+    }
 
     public static function form(Schema $schema): Schema
     {

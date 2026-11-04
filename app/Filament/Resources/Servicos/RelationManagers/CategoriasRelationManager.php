@@ -29,10 +29,14 @@ class CategoriasRelationManager extends RelationManager
             ->description('Para mudar a ordem das categorias neste serviço, carregue no botão "Reordenar registos" (as setas) e arraste as linhas.')
             ->recordTitleAttribute('nome')
             ->reorderable('ordem')
-            ->recordUrl(fn (Categoria $record): string => CategoriaResource::getUrl('edit', ['record' => $record]))
+            // Uma categoria de outro serviço pode ser usada aqui, mas só o responsável a abre para editar.
+            ->recordUrl(fn (Categoria $record): ?string => auth()->user()->can('update', $record) ? CategoriaResource::getUrl('edit', ['record' => $record]) : null)
             ->columns([
                 TextColumn::make('nome')
                     ->label('Nome'),
+                TextColumn::make('servico.nome')
+                    ->label('Responsável')
+                    ->placeholder('Sem responsável'),
                 IconColumn::make('ativo')
                     ->label('Ativa')
                     ->boolean(),

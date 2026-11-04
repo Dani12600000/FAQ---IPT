@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\TemServicoResponsavel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -12,9 +13,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
-#[Fillable(['pergunta', 'slug', 'resposta', 'publicada'])]
+#[Fillable(['servico_id', 'pergunta', 'slug', 'resposta', 'publicada'])]
 class Pergunta extends Model
 {
+    use TemServicoResponsavel;
+
     /**
      * Temas onde esta pergunta aparece.
      *
@@ -98,6 +101,24 @@ class Pergunta extends Model
     protected function publicadas(Builder $query): void
     {
         $query->where($query->qualifyColumn('publicada'), true);
+    }
+
+    /**
+     * Perguntas que a pessoa vê no backoffice: as do seu serviço e as de outros serviços
+     * que usa nos seus temas.
+     */
+    #[Scope]
+    protected function visiveisPara(Builder $query, User $user): void
+    {
+        if ($user->isAdmin()) {
+            return;
+        }
+
+        $servicos = $user->servicos->modelKeys();
+
+        $query->where(fn (Builder $q) => $q
+            ->whereIn($q->qualifyColumn('servico_id'), $servicos)
+            ->orWhereHas('temas', fn (Builder $t) => $t->whereIn('temas.servico_id', $servicos)));
     }
 
     /**

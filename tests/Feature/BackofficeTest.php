@@ -26,15 +26,21 @@ class BackofficeTest extends TestCase
         $this->get('/admin/perguntas')->assertRedirect('/admin/login');
     }
 
-    public function test_o_editor_gere_o_conteudo(): void
+    public function test_o_editor_gere_o_conteudo_do_seu_servico(): void
     {
-        $this->actingAs(User::factory()->create());
         [$servico, $categoria, $tema, $pergunta] = $this->conteudoLigado();
+        $editor = User::factory()->create();
+        $editor->servicos()->attach($servico);
+        $this->actingAs($editor);
 
-        foreach (['servicos', 'categorias', 'temas', 'perguntas'] as $recurso) {
+        foreach (['categorias', 'temas', 'perguntas'] as $recurso) {
             $this->get("/admin/{$recurso}")->assertOk();
             $this->get("/admin/{$recurso}/create")->assertOk();
         }
+
+        // Só o administrador cria serviços.
+        $this->get('/admin/servicos')->assertOk();
+        $this->get('/admin/servicos/create')->assertForbidden();
 
         $this->get("/admin/servicos/{$servico->id}/edit")->assertOk();
         $this->get("/admin/categorias/{$categoria->id}/edit")->assertOk();
@@ -77,9 +83,10 @@ class BackofficeTest extends TestCase
     private function conteudoLigado(): array
     {
         $servico = Servico::create(['nome' => 'Biblioteca', 'slug' => 'biblioteca']);
-        $categoria = Categoria::create(['nome' => 'Empréstimos', 'slug' => 'emprestimos']);
-        $tema = Tema::create(['nome' => 'Renovações', 'slug' => 'renovacoes']);
+        $categoria = Categoria::create(['servico_id' => $servico->id, 'nome' => 'Empréstimos', 'slug' => 'emprestimos']);
+        $tema = Tema::create(['servico_id' => $servico->id, 'nome' => 'Renovações', 'slug' => 'renovacoes']);
         $pergunta = Pergunta::create([
+            'servico_id' => $servico->id,
             'pergunta' => 'Como renovo um empréstimo?',
             'slug' => 'como-renovo-um-emprestimo',
             'resposta' => '<p>Resposta de exemplo.</p>',

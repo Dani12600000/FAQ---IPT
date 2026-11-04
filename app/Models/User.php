@@ -10,6 +10,7 @@ use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -37,6 +38,25 @@ class User extends Authenticatable implements FilamentUser
     public function isAdmin(): bool
     {
         return $this->papel === Papel::Admin;
+    }
+
+    /**
+     * Serviços cujo conteúdo esta pessoa gere (por exemplo, a Biblioteca).
+     *
+     * @return BelongsToMany<Servico, $this>
+     */
+    public function servicos(): BelongsToMany
+    {
+        return $this->belongsToMany(Servico::class);
+    }
+
+    /**
+     * Se pode alterar o conteúdo de um serviço. O administrador pode alterar tudo,
+     * incluindo o conteúdo sem serviço responsável.
+     */
+    public function podeGerirServico(?int $servicoId): bool
+    {
+        return $this->isAdmin() || ($servicoId !== null && $this->servicos->contains($servicoId));
     }
 
     /**

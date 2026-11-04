@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Categorias\Tables;
 
+use App\Models\Categoria;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -22,6 +23,9 @@ class CategoriasTable
                     ->label('Nome')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('servico.nome')
+                    ->label('Responsável')
+                    ->placeholder('Sem responsável'),
                 TextColumn::make('servicos.nome')
                     ->label('Serviços')
                     ->badge(),
@@ -29,7 +33,9 @@ class CategoriasTable
                     ->label('Temas')
                     ->counts('temas'),
                 ToggleColumn::make('ativo')
-                    ->label('Ativa'),
+                    ->label('Ativa')
+                    // Uma categoria de outro serviço aparece na lista, mas só o responsável a altera.
+                    ->disabled(fn (Categoria $record): bool => auth()->user()->cannot('update', $record)),
                 TextColumn::make('updated_at')
                     ->label('Atualizada em')
                     ->dateTime()
@@ -37,6 +43,10 @@ class CategoriasTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                SelectFilter::make('servico')
+                    ->label('Responsável')
+                    ->relationship('servico', 'nome')
+                    ->preload(),
                 SelectFilter::make('servicos')
                     ->label('Serviço')
                     ->relationship('servicos', 'nome')
@@ -49,7 +59,8 @@ class CategoriasTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->authorizeIndividualRecords('delete'),
                 ]),
             ]);
     }

@@ -58,4 +58,18 @@ class ConteudoExemploSeederTest extends TestCase
 
         $this->assertSame(['existe-epoca-especial-de-exames'], $rascunhos->all());
     }
+
+    public function test_todo_o_conteudo_tem_servico_responsavel_e_ha_reutilizacao(): void
+    {
+        $this->seed(ConteudoExemploSeeder::class);
+
+        $this->assertSame(0, Categoria::whereNull('servico_id')->count());
+        $this->assertSame(0, Tema::whereNull('servico_id')->count());
+        $this->assertSame(0, Pergunta::whereNull('servico_id')->count());
+
+        // Uma pergunta dos Serviços Académicos usada num tema da Ação Social.
+        $pergunta = Pergunta::firstWhere('slug', 'a-bolsa-de-estudo-cobre-a-propina');
+        $this->assertSame('servicos-academicos', $pergunta->servico->slug);
+        $this->assertTrue($pergunta->temas->contains(fn (Tema $tema) => $tema->servico->slug === 'acao-social'));
+    }
 }

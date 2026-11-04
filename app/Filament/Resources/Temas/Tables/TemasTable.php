@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Temas\Tables;
 
+use App\Models\Tema;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -22,6 +23,9 @@ class TemasTable
                     ->label('Nome')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('servico.nome')
+                    ->label('Responsável')
+                    ->placeholder('Sem responsável'),
                 TextColumn::make('categorias.nome')
                     ->label('Categorias')
                     ->badge(),
@@ -29,7 +33,9 @@ class TemasTable
                     ->label('Perguntas')
                     ->counts('perguntas'),
                 ToggleColumn::make('ativo')
-                    ->label('Ativo'),
+                    ->label('Ativo')
+                    // Um tema de outro serviço aparece na lista, mas só o responsável o altera.
+                    ->disabled(fn (Tema $record): bool => auth()->user()->cannot('update', $record)),
                 TextColumn::make('updated_at')
                     ->label('Atualizado em')
                     ->dateTime()
@@ -37,6 +43,10 @@ class TemasTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                SelectFilter::make('servico')
+                    ->label('Responsável')
+                    ->relationship('servico', 'nome')
+                    ->preload(),
                 SelectFilter::make('categorias')
                     ->label('Categoria')
                     ->relationship('categorias', 'nome')
@@ -49,7 +59,8 @@ class TemasTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->authorizeIndividualRecords('delete'),
                 ]),
             ]);
     }

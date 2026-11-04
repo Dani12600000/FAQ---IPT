@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\Perguntas\Schemas;
 
 use App\Filament\Forms\CamposComSlug;
+use App\Filament\Forms\CampoServicoResponsavel;
 use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 
@@ -25,13 +25,8 @@ class PerguntaForm
                         ['undo', 'redo'],
                     ])
                     ->columnSpanFull(),
-                Select::make('temas')
-                    ->label('Aparece nos temas')
-                    ->relationship('temas', 'nome')
-                    ->multiple()
-                    ->preload()
-                    ->searchable()
-                    ->columnSpanFull(),
+                CampoServicoResponsavel::make(),
+                CampoServicoResponsavel::ligacoes('temas', 'nome', 'Aparece nos temas', 'os temas'),
                 Toggle::make('publicada')
                     ->label('Publicada')
                     ->helperText('Uma pergunta por publicar fica guardada como rascunho e não aparece no site nem na API.'),

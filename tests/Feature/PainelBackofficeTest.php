@@ -24,7 +24,8 @@ class PainelBackofficeTest extends TestCase
     {
         parent::setUp();
 
-        $this->actingAs(User::factory()->create());
+        // As permissões por serviço são testadas em PermissoesPorServicoTest.
+        $this->actingAs(User::factory()->admin()->create());
     }
 
     public function test_o_painel_abre_com_os_widgets(): void

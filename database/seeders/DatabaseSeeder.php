@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Servico;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -28,13 +29,17 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        if (! User::where('email', 'editor@ipt.test')->exists()) {
-            User::factory()->create([
-                'name' => 'Editor de Teste',
-                'email' => 'editor@ipt.test',
-            ]);
-        }
-
         $this->call(ConteudoExemploSeeder::class);
+
+        // Um editor por serviço, com o slug do serviço no email (por exemplo, biblioteca@ipt.test).
+        Servico::all()->each(function (Servico $servico): void {
+            $editor = User::where('email', "{$servico->slug}@ipt.test")->first()
+                ?? User::factory()->create([
+                    'name' => "Editor de Teste ({$servico->nome})",
+                    'email' => "{$servico->slug}@ipt.test",
+                ]);
+
+            $editor->servicos()->syncWithoutDetaching($servico);
+        });
     }
 }

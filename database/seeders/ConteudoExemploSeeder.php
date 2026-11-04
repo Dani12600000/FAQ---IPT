@@ -252,33 +252,76 @@ class ConteudoExemploSeeder extends Seeder
      */
     public function run(): void
     {
-        $perguntas = collect(self::PERGUNTAS)->map(fn (array $dados, string $slug) => Pergunta::updateOrCreate(
+        $ordem = 0;
+        $servicos = collect(self::SERVICOS)->map(fn (array $dados, string $slug) => Servico::updateOrCreate(
             ['slug' => $slug],
-            ['pergunta' => $dados['pergunta'], 'resposta' => $dados['resposta'], 'publicada' => $dados['publicada'] ?? true],
+            ['nome' => $dados['nome'], 'descricao' => $dados['descricao'], 'ordem' => ++$ordem, 'ativo' => true],
         ));
 
-        $temas = collect(self::TEMAS)->map(function (array $dados, string $slug) use ($perguntas) {
-            $tema = Tema::updateOrCreate(['slug' => $slug], ['nome' => $dados['nome'], 'ativo' => true]);
+        $responsaveis = $this->responsaveis();
+        $servicoDe = fn (string $tipo, string $slug): ?int => $servicos->get($responsaveis[$tipo][$slug] ?? '')?->id;
+
+        $perguntas = collect(self::PERGUNTAS)->map(fn (array $dados, string $slug) => Pergunta::updateOrCreate(
+            ['slug' => $slug],
+            [
+                'servico_id' => $servicoDe('perguntas', $slug),
+                'pergunta' => $dados['pergunta'],
+                'resposta' => $dados['resposta'],
+                'publicada' => $dados['publicada'] ?? true,
+            ],
+        ));
+
+        $temas = collect(self::TEMAS)->map(function (array $dados, string $slug) use ($perguntas, $servicoDe) {
+            $tema = Tema::updateOrCreate(['slug' => $slug], ['servico_id' => $servicoDe('temas', $slug), 'nome' => $dados['nome'], 'ativo' => true]);
             $tema->perguntas()->sync($this->comOrdem($perguntas, $dados['perguntas']));
 
             return $tema;
         });
 
-        $categorias = collect(self::CATEGORIAS)->map(function (array $dados, string $slug) use ($temas) {
-            $categoria = Categoria::updateOrCreate(['slug' => $slug], ['nome' => $dados['nome'], 'ativo' => true]);
+        $categorias = collect(self::CATEGORIAS)->map(function (array $dados, string $slug) use ($temas, $servicoDe) {
+            $categoria = Categoria::updateOrCreate(['slug' => $slug], ['servico_id' => $servicoDe('categorias', $slug), 'nome' => $dados['nome'], 'ativo' => true]);
             $categoria->temas()->sync($this->comOrdem($temas, $dados['temas']));
 
             return $categoria;
         });
 
-        $ordem = 0;
-        foreach (self::SERVICOS as $slug => $dados) {
-            $servico = Servico::updateOrCreate(
-                ['slug' => $slug],
-                ['nome' => $dados['nome'], 'descricao' => $dados['descricao'], 'ordem' => ++$ordem, 'ativo' => true],
-            );
-            $servico->categorias()->sync($this->comOrdem($categorias, $dados['categorias']));
+        foreach ($servicos as $slug => $servico) {
+            $servico->categorias()->sync($this->comOrdem($categorias, self::SERVICOS[$slug]['categorias']));
         }
+    }
+
+    /**
+     * Serviço responsável por cada categoria, tema e pergunta: o primeiro serviço (pela ordem
+     * da página inicial) onde aparece. O que aparece também noutros serviços demonstra a
+     * reutilização: por exemplo, "A bolsa de estudo cobre a propina?" é dos Serviços Académicos
+     * e é usada pela Ação Social.
+     *
+     * @return array<string, array<string, string>> [tipo => [slug => slug do serviço]]
+     */
+    private function responsaveis(): array
+    {
+        $responsaveis = [
+            'categorias' => [],
+            'temas' => [],
+            // O rascunho sem tema não está em nenhum serviço, por isso é indicado aqui.
+            'perguntas' => ['existe-epoca-especial-de-exames' => 'servicos-academicos'],
+        ];
+
+        foreach (self::SERVICOS as $servico => $dados) {
+            foreach ($dados['categorias'] as $categoria) {
+                $responsaveis['categorias'][$categoria] ??= $servico;
+
+                foreach (self::CATEGORIAS[$categoria]['temas'] as $tema) {
+                    $responsaveis['temas'][$tema] ??= $servico;
+
+                    foreach (self::TEMAS[$tema]['perguntas'] as $pergunta) {
+                        $responsaveis['perguntas'][$pergunta] ??= $servico;
+                    }
+                }
+            }
+        }
+
+        return $responsaveis;
     }
 
     /**

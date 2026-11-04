@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Perguntas\Tables;
 
+use App\Models\Pergunta;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -24,18 +25,27 @@ class PerguntasTable
                     ->label('Pergunta')
                     ->searchable()
                     ->wrap(),
+                TextColumn::make('servico.nome')
+                    ->label('Responsável')
+                    ->placeholder('Sem responsável'),
                 TextColumn::make('temas.nome')
                     ->label('Temas')
                     ->badge()
                     ->placeholder('Sem tema'),
                 ToggleColumn::make('publicada')
-                    ->label('Publicada'),
+                    ->label('Publicada')
+                    // Uma pergunta de outro serviço aparece na lista, mas só o responsável a altera.
+                    ->disabled(fn (Pergunta $record): bool => auth()->user()->cannot('update', $record)),
                 TextColumn::make('updated_at')
                     ->label('Atualizada em')
                     ->dateTime()
                     ->sortable(),
             ])
             ->filters([
+                SelectFilter::make('servico')
+                    ->label('Responsável')
+                    ->relationship('servico', 'nome')
+                    ->preload(),
                 SelectFilter::make('temas')
                     ->label('Tema')
                     ->relationship('temas', 'nome')
@@ -51,7 +61,8 @@ class PerguntasTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->authorizeIndividualRecords('delete'),
                 ]),
             ]);
     }

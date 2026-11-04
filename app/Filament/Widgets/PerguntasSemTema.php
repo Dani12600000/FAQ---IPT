@@ -21,7 +21,7 @@ class PerguntasSemTema extends TableWidget
         return $table
             ->heading('Perguntas sem tema')
             ->description('Não aparecem na navegação do site. Se estiverem publicadas, só se chega a elas pela pesquisa ou pelo endereço /p/.')
-            ->query(fn (): Builder => Pergunta::query()->doesntHave('temas'))
+            ->query(fn (): Builder => Pergunta::query()->visiveisPara(auth()->user())->doesntHave('temas'))
             ->defaultSort('updated_at', 'desc')
             ->paginated([5, 10, 25])
             ->defaultPaginationPageOption(5)

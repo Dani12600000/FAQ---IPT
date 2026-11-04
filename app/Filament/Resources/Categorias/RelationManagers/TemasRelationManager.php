@@ -29,10 +29,14 @@ class TemasRelationManager extends RelationManager
             ->description('Para mudar a ordem dos temas nesta categoria, carregue no botão "Reordenar registos" (as setas) e arraste as linhas.')
             ->recordTitleAttribute('nome')
             ->reorderable('ordem')
-            ->recordUrl(fn (Tema $record): string => TemaResource::getUrl('edit', ['record' => $record]))
+            // Um tema de outro serviço pode ser usado aqui, mas só o responsável o abre para editar.
+            ->recordUrl(fn (Tema $record): ?string => auth()->user()->can('update', $record) ? TemaResource::getUrl('edit', ['record' => $record]) : null)
             ->columns([
                 TextColumn::make('nome')
                     ->label('Nome'),
+                TextColumn::make('servico.nome')
+                    ->label('Responsável')
+                    ->placeholder('Sem responsável'),
                 IconColumn::make('ativo')
                     ->label('Ativo')
                     ->boolean(),

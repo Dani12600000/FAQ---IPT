@@ -28,12 +28,18 @@ class PerguntasRelationManager extends RelationManager
         return $table
             ->description('Para mudar a ordem das perguntas neste tema, carregue no botão "Reordenar registos" (as setas) e arraste as linhas.')
             ->recordTitleAttribute('pergunta')
+            // Nas opções de "Adicionar pergunta" vê-se de que serviço é cada uma.
+            ->recordTitle(fn (Pergunta $record): string => $record->servico ? "{$record->pergunta} ({$record->servico->nome})" : $record->pergunta)
             ->reorderable('ordem')
-            ->recordUrl(fn (Pergunta $record): string => PerguntaResource::getUrl('edit', ['record' => $record]))
+            // Uma pergunta de outro serviço pode ser usada aqui, mas só o responsável a abre para editar.
+            ->recordUrl(fn (Pergunta $record): ?string => auth()->user()->can('update', $record) ? PerguntaResource::getUrl('edit', ['record' => $record]) : null)
             ->columns([
                 TextColumn::make('pergunta')
                     ->label('Pergunta')
                     ->wrap(),
+                TextColumn::make('servico.nome')
+                    ->label('Responsável')
+                    ->placeholder('Sem responsável'),
                 IconColumn::make('publicada')
                     ->label('Publicada')
                     ->boolean(),
