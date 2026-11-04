@@ -97,7 +97,10 @@ Criadas pelo seeder **só fora de produção** (`APP_ENV` diferente de `producti
 | Email | Papel | Palavra-passe |
 | --- | --- | --- |
 | `admin@ipt.test` | Administrador | `password` |
-| `editor@ipt.test` | Editor | `password` |
+| `servicos-academicos@ipt.test` | Editor dos Serviços Académicos | `password` |
+| `acao-social@ipt.test` | Editor da Ação Social | `password` |
+| `biblioteca@ipt.test` | Editor da Biblioteca | `password` |
+| `internacional@ipt.test` | Editor do Internacional | `password` |
 
 O `php artisan db:seed` pode correr várias vezes: não duplica contas nem conteúdo.
 
@@ -105,8 +108,9 @@ O `php artisan db:seed` pode correr várias vezes: não duplica contas nem conte
 
 ```
 app/
-  Models/                       Servico, Categoria, Tema, Pergunta, Pesquisa, Avaliacao, User
+  Models/                       Servico, Categoria, Tema, Pergunta, PerguntaVersao, Pesquisa, Avaliacao, User
                                 + ServicoCategoria, CategoriaTema, TemaPergunta (tabelas de ligação)
+    Concerns/TemServicoResponsavel.php   serviço responsável de categorias, temas e perguntas
   Http/Controllers/
     FaqController.php           páginas públicas e validação da cadeia de URLs
     PesquisaController.php      página de pesquisa (e resultados enquanto se escreve)
@@ -114,11 +118,14 @@ app/
     Api/                        controladores da API JSON
   Http/Resources/               formato do JSON da API (API Resources)
   Services/PesquisaFaq.php      lógica da pesquisa, partilhada pelo site e pela API
+  Services/PerguntasSemelhantes.php   perguntas parecidas com uma nova (no backoffice)
   Filament/
     Resources/                  backoffice: um recurso por entidade (formulário, tabela, páginas)
     Widgets/                    painel de estatísticas do backoffice
     Forms/CamposComSlug.php     campo de nome + slug gerado automaticamente
-  Policies/UserPolicy.php       só os administradores gerem utilizadores
+    Forms/CampoServicoResponsavel.php   serviço responsável e ligações limitadas aos serviços do editor
+  Policies/                     quem pode fazer o quê (UserPolicy, ServicoPolicy e ConteudoPolicy
+                                para categorias, temas e perguntas)
   Enums/Papel.php               papéis: admin e editor
 database/
   migrations/                   estrutura da base de dados
@@ -140,9 +147,11 @@ tests/Feature/                  testes
 | Tabela | Campos principais |
 | --- | --- |
 | `servicos` | nome, slug (único), descricao, **ordem** (ordem na página inicial), ativo |
-| `categorias` | nome, slug, descricao, ativo |
-| `temas` | nome, slug, descricao, ativo |
-| `perguntas` | pergunta, slug, resposta (HTML), resposta_texto (sem HTML, para a pesquisa), publicada |
+| `categorias` | **servico_id** (responsável), nome, slug, descricao, ativo |
+| `temas` | **servico_id** (responsável), nome, slug, descricao, ativo |
+| `perguntas` | **servico_id** (responsável), origem_id e origem_versao (versão própria), pergunta, slug, resposta (HTML), resposta_texto (sem HTML, para a pesquisa), publicada |
+| `pergunta_versoes` | pergunta_id, numero, pergunta, resposta, nota, user_id (autor), created_at |
+| `servico_user` | servico_id, user_id (serviços de cada editor) |
 | `servico_categoria` | servico_id, categoria_id, **ordem** (chave primária no par) |
 | `categoria_tema` | categoria_id, tema_id, **ordem** |
 | `tema_pergunta` | tema_id, pergunta_id, **ordem** |
@@ -156,6 +165,8 @@ Regras:
 - **Ativo / publicada:** o que está desativado ou por publicar não aparece no site nem na API, mas não é apagado. Os filtros estão nos modelos: `Servico::ativos()`, `Categoria::ativas()`, `Tema::ativos()` e `Pergunta::publicadas()`.
 - **Apagar** um item apaga também as suas ligações e, no caso das perguntas, as avaliações.
 - **`resposta_texto`** é preenchida automaticamente pelo modelo `Pergunta` sempre que a resposta muda.
+- **Serviço responsável (`servico_id`):** quem pode alterar o registo. Não decide onde ele aparece (isso são as ligações): uma pergunta da Biblioteca pode aparecer num tema da Ação Social. Se o serviço for apagado, o registo fica sem responsável e só os administradores o alteram.
+- **Versões:** o modelo `Pergunta` guarda uma cópia em `pergunta_versoes` ao criar e sempre que o texto da pergunta ou da resposta muda (mudar o slug, o responsável ou o estado de publicação não conta). Repor uma versão antiga cria uma versão nova com a nota "Reposição da versão N".
 
 ## Site público
 
@@ -191,7 +202,18 @@ Em `/admin` (Filament).
 - **Resposta** com editor de texto rico (negrito, itálico, ligações, títulos, listas).
 - **Pré-visualizar** a pergunta tal como está escrita, mesmo antes de gravar, e **Ver no site** quando está publicada.
 - **Painel de Controlo:** pesquisas sem resultados, perguntas mais e menos úteis, perguntas sem tema.
-- **Papéis:** o **administrador** gere tudo, incluindo utilizadores. O **editor** gere só o conteúdo e não vê o menu Utilizadores.
+- **Papéis:** o **administrador** gere tudo, incluindo utilizadores e serviços. O **editor** gere só o conteúdo e não vê o menu Utilizadores.
+- **Editores por serviço:** o administrador atribui a cada editor um ou mais serviços (em Utilizadores). O editor:
+  - só altera as categorias, temas e perguntas cujo **serviço responsável** é um dos seus, e só altera os seus serviços (não cria, apaga nem reordena serviços);
+  - vê nas listas o seu conteúdo e o de outros serviços que usa (por exemplo, uma pergunta da Biblioteca num tema seu), mas este último não o pode abrir nem publicar/despublicar;
+  - pode **usar** conteúdo de outros serviços: nas tabelas "Adicionar tema/pergunta" de um registo seu aparece tudo, com o serviço responsável entre parênteses;
+  - nos campos "Aparece nos…" só vê as suas opções; ao gravar, as ligações feitas por outros serviços mantêm-se.
+- **Perguntas parecidas:** ao criar uma pergunta, depois de escrever o texto aparece "Já existe uma pergunta parecida?" com as perguntas mais semelhantes de qualquer serviço (com o responsável, a percentagem e o início da resposta). Se uma delas for a mesma, escolhe-se e indica-se em que temas seus deve aparecer: não se cria uma pergunta nova, liga-se a existente, e a resposta continua a ser mantida pelo serviço responsável. Se a pergunta escolhida não tiver responsável, passa a ser do serviço do primeiro tema escolhido. Se não for, fica "Não, é uma pergunta nova". A comparação está em `App\Services\PerguntasSemelhantes`: compara as palavras da pergunta sem acentos, sem palavras vazias ("como", "posso"…) e pelas 5 primeiras letras (para "renovo" e "renovar" contarem como iguais). O limiar está em `PerguntasSemelhantes::LIMIAR`.
+- **Versão própria (ramo de uma pergunta):** se um serviço usa uma pergunta de outro e quer uma resposta diferente, na tabela "Perguntas deste tema" de um tema seu carrega em **"Criar versão própria"**. Fica uma cópia, do seu serviço, no lugar da original (na mesma posição) nos temas desse serviço. A original não muda para os outros. A cópia guarda de onde veio (`origem_id`) e a versão da original em que as duas eram iguais (`origem_versao`, a base comum). Na página de edição da cópia, o menu **"Versão própria"** permite:
+  - **Comparar com a original:** a base comum, a original agora e a cópia, lado a lado;
+  - **Trazer o texto da original** ou **Manter o meu texto**, quando a original mudou (o aviso no topo da página diz quando);
+  - **Voltar a usar a original:** nos temas onde a cópia aparece volta a aparecer a original, e a cópia fica por publicar e sem temas, com o seu histórico.
+- **Histórico de versões:** ao editar uma pergunta, a tabela "Histórico de versões" mostra cada versão (autor, data e nota), permite **Ver** o texto dessa versão e **Repor** uma versão antiga.
 
 ## API JSON
 
@@ -261,7 +283,7 @@ Notas para quem integrar:
 php artisan test
 ```
 
-Cobrem, entre outros: a validação da cadeia de URLs, a ordem nas tabelas de ligação, a pesquisa e o seu registo, a API, o "foi útil?", o JSON-LD, as permissões do backoffice, o painel e o conteúdo de exemplo.
+Cobrem, entre outros: a validação da cadeia de URLs, a ordem nas tabelas de ligação, a pesquisa e o seu registo, a API, o "foi útil?", o JSON-LD, as permissões do backoffice (incluindo por serviço), o histórico de versões, as versões próprias, as perguntas parecidas, o painel e o conteúdo de exemplo.
 
 Os testes correm numa base **SQLite em memória** (ver `phpunit.xml`): são rápidos e não tocam no MySQL. **Atenção:** o SQLite não se comporta exatamente como o MySQL:
 
@@ -320,6 +342,10 @@ Resumo dos passos específicos deste projeto. O resto segue o [guia de deploymen
 
 - **Sem compilação de CSS/JS:** quem mantiver o site não precisa de Node nem de npm. Se o site crescer muito, pode passar-se para o Vite (que vem com o Laravel).
 - **Pesquisa com `LIKE`:** procura o texto tal como está escrito. No MySQL ignora maiúsculas e acentos ("acao" encontra "ação"), mas "propinas" não encontra "propina" (singular). Para algo mais tolerante, o passo seguinte seria um índice `FULLTEXT` do MySQL ou um motor de pesquisa (por exemplo, Laravel Scout).
+- **Perguntas parecidas sem serviços externos:** a comparação é feita em PHP, palavra a palavra, contra todas as perguntas. É instantânea com algumas centenas de perguntas e não envia texto para fora. Não percebe sinónimos ("propina" e "mensalidade"); para isso seria preciso um modelo de linguagem (embeddings).
+- **Só o serviço responsável altera um registo partilhado:** se a Ação Social usa uma pergunta da Biblioteca e quer outra resposta, cria uma versão própria.
+- **Versões próprias são perguntas normais:** cada uma tem a sua página no site, o seu responsável e o seu histórico, por isso o site, a API e a pesquisa não precisaram de mudar. A comparação mostra os textos lado a lado, sem marcar as palavras alteradas.
+- **Juntar perguntas repetidas** escritas à parte por serviços diferentes (sem serem versão própria uma da outra) ainda não existe. "Voltar a usar a original" já faz isto para as versões próprias.
 - **Sem Sanctum:** a API é pública e só de leitura, por isso o `routes/api.php` foi registado à mão em `bootstrap/app.php`, sem o `php artisan install:api` (que instala o Sanctum).
 - **Cookies:** o site público usa só os cookies técnicos do Laravel (sessão e proteção CSRF dos formulários). Não há cookies de rastreio.
 - **Versão em inglês:** ainda não existe. Os textos da interface estão nas vistas e em `lang/pt/`, e a estrutura não impede acrescentar outra língua.
