@@ -4,12 +4,12 @@ namespace Database\Seeders;
 
 use App\Models\Servico;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
+    // Sem WithoutModelEvents: os eventos dos modelos fazem parte do conteúdo
+    // (por exemplo, cada pergunta nova fica com a versão 1 no histórico).
 
     /**
      * Seed the application's database.

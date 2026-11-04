@@ -72,4 +72,13 @@ class ConteudoExemploSeederTest extends TestCase
         $this->assertSame('servicos-academicos', $pergunta->servico->slug);
         $this->assertTrue($pergunta->temas->contains(fn (Tema $tema) => $tema->servico->slug === 'acao-social'));
     }
+
+    public function test_cada_pergunta_comeca_com_a_versao_1(): void
+    {
+        $this->seed(ConteudoExemploSeeder::class);
+        $this->seed(ConteudoExemploSeeder::class);
+
+        // Correr outra vez sem mudar o texto não cria versões novas.
+        Pergunta::all()->each(fn (Pergunta $pergunta) => $this->assertSame([1], $pergunta->versoes()->pluck('numero')->all()));
+    }
 }

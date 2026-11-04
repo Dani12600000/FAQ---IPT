@@ -18,6 +18,56 @@ class Pergunta extends Model
 {
     use TemServicoResponsavel;
 
+    protected static function booted(): void
+    {
+        // Guarda uma versão ao criar e sempre que o texto da pergunta ou da resposta muda.
+        // Mudar só o slug, o serviço ou o estado de publicação não cria versão.
+        static::created(function (self $pergunta): void {
+            $pergunta->registarVersao();
+        });
+
+        static::updated(function (self $pergunta): void {
+            if ($pergunta->wasChanged(['pergunta', 'resposta'])) {
+                $pergunta->registarVersao();
+            }
+        });
+    }
+
+    /**
+     * Histórico do texto da pergunta e da resposta, da versão mais recente para a mais antiga.
+     *
+     * @return HasMany<PerguntaVersao, $this>
+     */
+    public function versoes(): HasMany
+    {
+        return $this->hasMany(PerguntaVersao::class)->orderByDesc('numero');
+    }
+
+    /**
+     * Guarda o texto atual como uma nova versão, com quem tem a sessão aberta como autor.
+     */
+    public function registarVersao(?string $nota = null): PerguntaVersao
+    {
+        return $this->versoes()->create([
+            'numero' => $this->versoes()->max('numero') + 1,
+            'pergunta' => $this->pergunta,
+            'resposta' => $this->resposta,
+            'nota' => $nota,
+            'user_id' => auth()->id(),
+        ]);
+    }
+
+    /**
+     * Volta ao texto de uma versão antiga. Não apaga nada: a reposição fica como uma versão nova.
+     */
+    public function reporVersao(PerguntaVersao $versao): void
+    {
+        $this->fill(['pergunta' => $versao->pergunta, 'resposta' => $versao->resposta]);
+        // Grava sem eventos, para registar a versão uma só vez e com a nota certa.
+        $this->saveQuietly();
+        $this->registarVersao("Reposição da versão {$versao->numero}");
+    }
+
     /**
      * Temas onde esta pergunta aparece.
      *

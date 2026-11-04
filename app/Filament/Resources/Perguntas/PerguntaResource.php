@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Perguntas;
 use App\Filament\Resources\Perguntas\Pages\CreatePergunta;
 use App\Filament\Resources\Perguntas\Pages\EditPergunta;
 use App\Filament\Resources\Perguntas\Pages\ListPerguntas;
+use App\Filament\Resources\Perguntas\RelationManagers\VersoesRelationManager;
 use App\Filament\Resources\Perguntas\Schemas\PerguntaForm;
 use App\Filament\Resources\Perguntas\Tables\PerguntasTable;
 use App\Models\Pergunta;
@@ -53,7 +54,7 @@ class PerguntaResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            VersoesRelationManager::class,
         ];
     }
 
