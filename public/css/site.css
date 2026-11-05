@@ -39,6 +39,11 @@ html {
     -webkit-text-size-adjust: 100%;
 }
 
+/* O atributo hidden esconde sempre, mesmo em elementos com display definido (ex.: flex). */
+[hidden] {
+    display: none !important;
+}
+
 body {
     display: flex;
     flex-direction: column;
@@ -706,30 +711,62 @@ main:focus {
 }
 
 .avaliacao-botoes button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
     font: inherit;
-    min-width: 5.5rem;
-    padding: 0.45rem 1.1rem;
-    border: 1px solid var(--cor-primaria);
+    min-width: 6rem;
+    padding: 0.5rem 1.1rem;
+    border: 1px solid var(--cor-borda-forte);
     border-radius: 999px;
     background: var(--cor-fundo);
     color: var(--cor-primaria);
     font-weight: 700;
     cursor: pointer;
-    transition: background var(--transicao), color var(--transicao);
+    box-shadow: var(--sombra);
+    transition: background var(--transicao), color var(--transicao), border-color var(--transicao), transform var(--transicao);
+}
+
+.avaliacao-icone {
+    flex: none;
+    transition: transform var(--transicao);
+}
+
+/* O "Não" usa o mesmo polegar, virado para baixo. */
+.avaliacao-nao .avaliacao-icone {
+    transform: scaleY(-1);
 }
 
 .avaliacao-botoes button:hover:not(:disabled) {
     background: var(--cor-primaria);
+    border-color: var(--cor-primaria);
     color: #fff;
 }
 
+.avaliacao-botoes button:hover:not(:disabled) .avaliacao-icone {
+    transform: rotate(-12deg);
+}
+
+.avaliacao-botoes .avaliacao-nao:hover:not(:disabled) .avaliacao-icone {
+    transform: scaleY(-1) rotate(12deg);
+}
+
+.avaliacao-botoes button:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+/* Enquanto a resposta é enviada (é só um instante). */
 .avaliacao-botoes button:disabled {
-    cursor: wait;
+    cursor: default;
     opacity: 0.6;
 }
 
 /* Fica sempre no documento (mesmo vazio) para os leitores de ecrã anunciarem a mensagem. */
 .avaliacao-estado {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
     margin: 0;
     font-weight: 700;
     color: var(--cor-sucesso);
@@ -737,6 +774,30 @@ main:focus {
 
 .avaliacao-estado:empty {
     display: none;
+}
+
+/* Depois de responder: caixa verde com um visto. */
+.avaliacao-respondida {
+    border-color: #bbe5c8;
+    background: #effaf2;
+}
+
+.avaliacao-respondida .avaliacao-estado::before {
+    content: "";
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    /* Visto branco (SVG) sobre um círculo verde. */
+    background: var(--cor-sucesso) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 1.15rem no-repeat;
+    animation: aparecer 250ms ease-out;
+}
+
+@keyframes aparecer {
+    from {
+        transform: scale(0.6);
+        opacity: 0;
+    }
 }
 
 .tambem {
@@ -832,5 +893,9 @@ main:focus {
 
     .cartao:hover {
         transform: none;
+    }
+
+    .avaliacao-respondida .avaliacao-estado::before {
+        animation: none;
     }
 }

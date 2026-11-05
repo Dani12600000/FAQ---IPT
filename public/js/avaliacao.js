@@ -31,6 +31,7 @@
                 })
                 .then(function (json) {
                     formulario.hidden = true;
+                    formulario.parentElement.classList.add('avaliacao-respondida');
                     estado.textContent = json.mensagem;
                 })
                 .catch(function () {
