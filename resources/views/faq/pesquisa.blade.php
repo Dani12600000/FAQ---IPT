@@ -1,9 +1,11 @@
 <x-layout :titulo="$termo !== '' ? 'Pesquisa: '.$termo : 'Pesquisa'">
-    <x-breadcrumb :itens="[
-        ['label' => 'Pesquisa', 'url' => null],
-    ]" />
+    <x-slot:topo>
+        <x-breadcrumb :itens="[
+            ['label' => 'Pesquisa', 'url' => null],
+        ]" />
 
-    <h1>Pesquisa</h1>
+        <h1>Pesquisa</h1>
+    </x-slot:topo>
 
     <x-pesquisa :termo="$termo">
         {{-- Este bloco é também devolvido sozinho à pesquisa enquanto se escreve. --}}
@@ -22,8 +24,10 @@
                     <ul class="lista-resultados">
                         @foreach ($resultados as $pergunta)
                             <li>
-                                <a href="{{ route('faq.canonica', $pergunta->slug) }}">{{ $pergunta->pergunta }}</a>
-                                <p>{{ Str::limit($pergunta->resposta_texto, 160) }}</p>
+                                <a class="resultado" href="{{ route('faq.canonica', $pergunta->slug) }}">
+                                    <span class="resultado-titulo">{{ $pergunta->pergunta }}</span>
+                                    <span class="resultado-texto">{{ Str::limit($pergunta->resposta_texto, 160) }}</span>
+                                </a>
                             </li>
                         @endforeach
                     </ul>

@@ -1,13 +1,15 @@
 <x-layout :titulo="$categoria->nome.' — '.$servico->nome" :descricao="$categoria->descricao ?: 'Perguntas frequentes sobre '.$categoria->nome.'.'">
-    <x-breadcrumb :itens="[
-        ['label' => $servico->nome, 'url' => route('faq.servico', $servico->slug)],
-        ['label' => $categoria->nome, 'url' => null],
-    ]" />
+    <x-slot:topo>
+        <x-breadcrumb :itens="[
+            ['label' => $servico->nome, 'url' => route('faq.servico', $servico->slug)],
+            ['label' => $categoria->nome, 'url' => null],
+        ]" />
 
-    <h1>{{ $categoria->nome }}</h1>
-    @if ($categoria->descricao)
-        <p class="introducao">{{ $categoria->descricao }}</p>
-    @endif
+        <h1>{{ $categoria->nome }}</h1>
+        @if ($categoria->descricao)
+            <p class="introducao">{{ $categoria->descricao }}</p>
+        @endif
+    </x-slot:topo>
 
     <section aria-labelledby="titulo-temas">
         <h2 id="titulo-temas">Temas</h2>

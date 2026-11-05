@@ -5,16 +5,18 @@
         @endif
     </x-slot:head>
 
-    <x-breadcrumb :itens="[
-        ['label' => $servico->nome, 'url' => route('faq.servico', $servico->slug)],
-        ['label' => $categoria->nome, 'url' => route('faq.categoria', [$servico->slug, $categoria->slug])],
-        ['label' => $tema->nome, 'url' => null],
-    ]" />
+    <x-slot:topo>
+        <x-breadcrumb :itens="[
+            ['label' => $servico->nome, 'url' => route('faq.servico', $servico->slug)],
+            ['label' => $categoria->nome, 'url' => route('faq.categoria', [$servico->slug, $categoria->slug])],
+            ['label' => $tema->nome, 'url' => null],
+        ]" />
 
-    <h1>{{ $tema->nome }}</h1>
-    @if ($tema->descricao)
-        <p class="introducao">{{ $tema->descricao }}</p>
-    @endif
+        <h1>{{ $tema->nome }}</h1>
+        @if ($tema->descricao)
+            <p class="introducao">{{ $tema->descricao }}</p>
+        @endif
+    </x-slot:topo>
 
     @if ($perguntas->isEmpty())
         <p>Este tema ainda não tem perguntas publicadas.</p>
@@ -24,14 +26,16 @@
             @foreach ($perguntas as $pergunta)
                 <details>
                     <summary>{{ $pergunta->pergunta }}</summary>
-                    <div class="resposta">
-                        {!! $pergunta->respostaSegura() !!}
+                    <div class="acordeao-corpo">
+                        <div class="resposta">
+                            {!! $pergunta->respostaSegura() !!}
+                        </div>
+                        <p class="ligacao-pergunta">
+                            <a href="{{ route('faq.pergunta', [$servico->slug, $categoria->slug, $tema->slug, $pergunta->slug]) }}">
+                                Abrir esta pergunta numa página própria<span class="so-leitor">: {{ $pergunta->pergunta }}</span>
+                            </a>
+                        </p>
                     </div>
-                    <p class="ligacao-pergunta">
-                        <a href="{{ route('faq.pergunta', [$servico->slug, $categoria->slug, $tema->slug, $pergunta->slug]) }}">
-                            Abrir esta pergunta numa página própria<span class="so-leitor">: {{ $pergunta->pergunta }}</span>
-                        </a>
-                    </p>
                 </details>
             @endforeach
         </div>

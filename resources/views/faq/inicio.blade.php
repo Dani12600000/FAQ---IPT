@@ -1,10 +1,12 @@
-<x-layout titulo="Início">
-    <x-breadcrumb />
+<x-layout titulo="Início" destaque>
+    <x-slot:topo>
+        <x-breadcrumb />
 
-    <h1>Perguntas frequentes</h1>
-    <p class="introducao">Encontre respostas sobre os serviços do Instituto Politécnico de Tomar. Pesquise ou escolha um serviço.</p>
+        <h1>Como podemos ajudar?</h1>
+        <p class="introducao">Encontre respostas sobre os serviços do Instituto Politécnico de Tomar. Pesquise ou escolha um serviço.</p>
 
-    <x-pesquisa />
+        <x-pesquisa />
+    </x-slot:topo>
 
     <section aria-labelledby="titulo-servicos">
         <h2 id="titulo-servicos">Serviços</h2>

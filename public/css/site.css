@@ -1,24 +1,32 @@
 /*
  * Estilos do site público do FAQ.
  *
- * As cores e tipos de letra estão nas variáveis abaixo, para ser fácil adaptar
- * à identidade visual do IPT. As cores atuais são provisórias e têm contraste
- * de pelo menos 4,5:1 sobre o fundo (WCAG AA).
+ * As cores, tipos de letra, sombras e raios estão nas variáveis abaixo, para ser
+ * fácil adaptar à identidade visual do IPT. As cores atuais são provisórias e o
+ * texto tem contraste de pelo menos 4,5:1 sobre o fundo onde aparece (WCAG AA).
  */
 
 :root {
     --cor-primaria: #0b4f6c;
     --cor-primaria-escura: #083a50;
+    --cor-primaria-clara: #e3eef3;
     --cor-texto: #1d2329;
     --cor-texto-suave: #4a5560;
     --cor-fundo: #ffffff;
     --cor-fundo-suave: #f3f6f8;
-    --cor-borda: #c9d3db;
+    --cor-borda: #d5dde3;
+    --cor-borda-forte: #9fb1bd;
     --cor-foco: #d97706;
+    --cor-sucesso: #166534;
 
     --letra: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-    --largura: 52rem;
-    --raio: 0.5rem;
+    --largura: 64rem;
+    --largura-texto: 44rem;
+    --raio: 0.75rem;
+    --raio-pequeno: 0.5rem;
+    --sombra: 0 1px 2px rgb(16 42 56 / 0.06), 0 1px 3px rgb(16 42 56 / 0.08);
+    --sombra-elevada: 0 4px 8px rgb(16 42 56 / 0.06), 0 12px 24px rgb(16 42 56 / 0.1);
+    --transicao: 150ms ease;
 }
 
 *,
@@ -27,22 +35,32 @@
     box-sizing: border-box;
 }
 
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
 body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
     margin: 0;
     font-family: var(--letra);
     font-size: 1.0625rem;
     line-height: 1.6;
     color: var(--cor-texto);
     background: var(--cor-fundo);
+    -webkit-font-smoothing: antialiased;
 }
 
 a {
     color: var(--cor-primaria);
-    text-underline-offset: 0.15em;
+    text-underline-offset: 0.18em;
+    text-decoration-thickness: 1px;
 }
 
 a:hover {
     color: var(--cor-primaria-escura);
+    text-decoration-thickness: 2px;
 }
 
 :focus-visible {
@@ -52,31 +70,38 @@ a:hover {
 
 h1,
 h2 {
-    line-height: 1.25;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
 }
 
 h1 {
-    font-size: clamp(1.6rem, 4vw, 2.2rem);
-    margin: 0.5rem 0 1rem;
+    font-size: clamp(1.75rem, 4.5vw, 2.5rem);
+    margin: 0.75rem 0 0.75rem;
 }
 
 h2 {
-    font-size: 1.3rem;
-    margin: 2rem 0 1rem;
+    font-size: 1.25rem;
+    margin: 0 0 1.25rem;
 }
 
 .contentor {
+    width: 100%;
     max-width: var(--largura);
     margin: 0 auto;
-    padding: 0 1rem;
+    padding: 0 1.25rem;
 }
 
 main {
-    padding-bottom: 3rem;
+    flex: 1;
 }
 
 main:focus {
     outline: none;
+}
+
+.corpo {
+    padding-top: 2.5rem;
+    padding-bottom: 4rem;
 }
 
 /* Texto só para leitores de ecrã. */
@@ -98,53 +123,161 @@ main:focus {
     left: 1rem;
     top: -10rem;
     padding: 0.5rem 1rem;
-    background: var(--cor-primaria);
-    color: #fff;
+    border-radius: var(--raio-pequeno);
+    background: var(--cor-fundo);
+    color: var(--cor-primaria);
+    font-weight: 700;
     z-index: 10;
 }
 
 .saltar:focus {
     top: 1rem;
+}
+
+/* Cabeçalho */
+
+.cabecalho {
+    background: var(--cor-primaria-escura);
     color: #fff;
 }
 
-/* Cabeçalho e rodapé */
+.cabecalho-linha {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 4.25rem;
+}
 
-.cabecalho {
-    background: var(--cor-primaria);
-    color: #fff;
-    padding: 1rem 0;
+.cabecalho :focus-visible {
+    outline-color: #fff;
 }
 
 .marca {
     display: inline-flex;
-    align-items: baseline;
-    gap: 0.6rem;
+    align-items: center;
+    gap: 0.75rem;
     color: #fff;
     text-decoration: none;
 }
 
 .marca:hover {
     color: #fff;
+}
+
+.marca:hover .marca-nome {
     text-decoration: underline;
 }
 
 .marca-sigla {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--raio-pequeno);
+    background: #fff;
+    color: var(--cor-primaria-escura);
     font-weight: 800;
-    font-size: 1.4rem;
-    letter-spacing: 0.05em;
+    font-size: 0.95rem;
+    letter-spacing: 0.04em;
+}
+
+.marca-texto {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
 }
 
 .marca-nome {
+    font-weight: 700;
     font-size: 1.05rem;
 }
 
-.rodape {
-    border-top: 1px solid var(--cor-borda);
-    background: var(--cor-fundo-suave);
+.marca-instituicao {
+    font-size: 0.85rem;
+    color: #d4e2e9;
+}
+
+.cabecalho-pesquisa {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.9rem;
+    border: 1px solid rgb(255 255 255 / 0.45);
+    border-radius: 999px;
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background var(--transicao), border-color var(--transicao);
+}
+
+/* Lupa desenhada só com CSS (não é lida pelos leitores de ecrã). */
+.cabecalho-pesquisa::before {
+    content: "";
+    width: 0.7rem;
+    height: 0.7rem;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+    box-shadow: 3px 3px 0 -1px currentColor;
+}
+
+.cabecalho-pesquisa:hover {
+    color: #fff;
+    background: rgb(255 255 255 / 0.12);
+    border-color: #fff;
+}
+
+/* Faixa de topo de cada página: caminho, título e introdução. */
+
+.topo {
+    background: linear-gradient(180deg, var(--cor-primaria-clara), var(--cor-fundo-suave));
+    border-bottom: 1px solid var(--cor-borda);
+    padding: 1.25rem 0 2rem;
+}
+
+.topo h1 {
+    max-width: var(--largura-texto);
+}
+
+.introducao {
+    max-width: var(--largura-texto);
+    margin: 0;
+    font-size: 1.125rem;
     color: var(--cor-texto-suave);
-    font-size: 0.9rem;
-    padding: 1rem 0;
+}
+
+/* Faixa de topo em destaque (página inicial). */
+
+.topo-destaque {
+    background:
+        radial-gradient(60rem 20rem at 85% -10%, rgb(255 255 255 / 0.12), transparent 70%),
+        linear-gradient(135deg, var(--cor-primaria) 0%, var(--cor-primaria-escura) 100%);
+    border-bottom: 0;
+    color: #fff;
+    padding: 1.25rem 0 3rem;
+}
+
+.topo-destaque h1 {
+    margin-top: 1.5rem;
+}
+
+.topo-destaque .introducao {
+    color: #dbe7ed;
+}
+
+.topo-destaque a {
+    color: #fff;
+}
+
+.topo-destaque :focus-visible {
+    outline-color: #fff;
+}
+
+.topo-destaque .breadcrumb ol,
+.topo-destaque .breadcrumb li + li::before,
+.topo-destaque .breadcrumb [aria-current="page"] {
+    color: #dbe7ed;
 }
 
 /* Caminho de navegação */
@@ -152,8 +285,9 @@ main:focus {
 .breadcrumb ol {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     list-style: none;
-    margin: 1rem 0 0;
+    margin: 0;
     padding: 0;
     font-size: 0.9rem;
     color: var(--cor-texto-suave);
@@ -165,14 +299,16 @@ main:focus {
     color: var(--cor-texto-suave);
 }
 
-.breadcrumb [aria-current="page"] {
-    color: var(--cor-texto);
+.breadcrumb a {
+    text-decoration: none;
 }
 
-.introducao {
-    font-size: 1.125rem;
-    color: var(--cor-texto-suave);
-    margin-top: 0;
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb [aria-current="page"] {
+    color: var(--cor-texto);
 }
 
 /* Cartões (serviços, categorias, temas) */
@@ -183,35 +319,62 @@ main:focus {
     padding: 0;
     display: grid;
     gap: 1rem;
-    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
 }
 
 .cartao {
-    display: block;
+    position: relative;
+    display: flex;
+    flex-direction: column;
     height: 100%;
-    padding: 1rem 1.25rem;
+    padding: 1.25rem 3rem 1.25rem 1.25rem;
     border: 1px solid var(--cor-borda);
     border-radius: var(--raio);
     background: var(--cor-fundo);
+    box-shadow: var(--sombra);
     text-decoration: none;
     color: var(--cor-texto);
+    transition: border-color var(--transicao), box-shadow var(--transicao), transform var(--transicao);
+}
+
+/* Seta desenhada só com CSS (não é lida pelos leitores de ecrã). */
+.cartao::after {
+    content: "";
+    position: absolute;
+    right: 1.4rem;
+    top: 50%;
+    width: 0.55rem;
+    height: 0.55rem;
+    border-top: 2px solid var(--cor-primaria);
+    border-right: 2px solid var(--cor-primaria);
+    transform: translateY(-50%) rotate(45deg);
+    transition: right var(--transicao);
 }
 
 .cartao:hover {
-    border-color: var(--cor-primaria);
-    background: var(--cor-fundo-suave);
+    border-color: var(--cor-borda-forte);
+    box-shadow: var(--sombra-elevada);
+    transform: translateY(-2px);
     color: var(--cor-texto);
 }
 
+.cartao:hover::after {
+    right: 1.1rem;
+}
+
 .cartao-titulo {
-    display: block;
     font-weight: 700;
+    font-size: 1.1rem;
     color: var(--cor-primaria);
 }
 
+.cartao:hover .cartao-titulo {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+}
+
 .cartao-texto {
-    display: block;
-    margin-top: 0.25rem;
+    margin-top: 0.35rem;
     font-size: 0.95rem;
     color: var(--cor-texto-suave);
 }
@@ -219,42 +382,79 @@ main:focus {
 /* Pesquisa */
 
 .pesquisa {
-    margin: 1.5rem 0 0.5rem;
+    max-width: var(--largura-texto);
+    margin: 0 0 0.5rem;
+}
+
+.topo-destaque .pesquisa {
+    margin-top: 1.75rem;
 }
 
 .pesquisa label {
     display: block;
     font-weight: 700;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.5rem;
 }
 
 .pesquisa-linha {
     display: flex;
     gap: 0.5rem;
+    padding: 0.4rem;
+    border: 1px solid var(--cor-borda-forte);
+    border-radius: var(--raio);
+    background: var(--cor-fundo);
+    box-shadow: var(--sombra);
+}
+
+/* O contorno de foco fica na caixa toda, com a cor de foco. */
+.pesquisa-linha:has(input:focus-visible) {
+    border-color: var(--cor-foco);
+    box-shadow: 0 0 0 2px var(--cor-foco), var(--sombra);
+}
+
+.topo-destaque .pesquisa-linha {
+    border-color: transparent;
+    box-shadow: var(--sombra-elevada);
+}
+
+.topo-destaque .pesquisa-linha:has(input:focus-visible) {
+    border-color: #fff;
+    box-shadow: 0 0 0 3px #fff, var(--sombra-elevada);
 }
 
 .pesquisa input {
     flex: 1;
     min-width: 0;
     font: inherit;
-    padding: 0.6rem 0.8rem;
-    border: 2px solid var(--cor-borda);
-    border-radius: var(--raio);
+    font-size: 1.05rem;
+    padding: 0.55rem 0.75rem;
+    border: 0;
+    border-radius: var(--raio-pequeno);
+    background: transparent;
+    color: var(--cor-texto);
 }
 
 .pesquisa input:focus-visible {
-    border-color: var(--cor-primaria);
+    outline: none;
+}
+
+/* Browsers sem :has() mantêm o contorno no próprio campo. */
+@supports not selector(:has(*)) {
+    .pesquisa input:focus-visible {
+        outline: 2px solid var(--cor-foco);
+    }
 }
 
 .pesquisa button {
     font: inherit;
     font-weight: 700;
-    padding: 0.6rem 1.2rem;
+    padding: 0.55rem 1.4rem;
     border: 0;
-    border-radius: var(--raio);
+    border-radius: var(--raio-pequeno);
     background: var(--cor-primaria);
     color: #fff;
     cursor: pointer;
+    transition: background var(--transicao);
 }
 
 .pesquisa button:hover {
@@ -262,81 +462,242 @@ main:focus {
 }
 
 .ajuda {
-    margin: 0.4rem 0 0;
+    margin: 0.5rem 0 0;
     font-size: 0.9rem;
     color: var(--cor-texto-suave);
 }
 
+.topo-destaque .ajuda {
+    color: #dbe7ed;
+}
+
+/* Resultados da pesquisa */
+
+.resultados {
+    max-width: var(--largura-texto);
+    margin-top: 1rem;
+}
+
+/* Na página inicial, os resultados aparecem num painel branco por baixo da caixa. */
+.topo-destaque .resultados > div {
+    padding: 1rem 1.25rem;
+    border-radius: var(--raio);
+    background: var(--cor-fundo);
+    color: var(--cor-texto);
+    box-shadow: var(--sombra-elevada);
+}
+
+.topo-destaque .resultados a {
+    color: var(--cor-primaria);
+}
+
+.topo-destaque .resultados :focus-visible {
+    outline-color: var(--cor-foco);
+}
+
+.resultados p {
+    margin: 0.25rem 0;
+}
+
 .contagem {
     font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--cor-texto-suave);
 }
 
 .lista-resultados {
     list-style: none;
-    margin: 0;
+    margin: 0.75rem 0 0;
     padding: 0;
+    display: grid;
+    gap: 0.5rem;
 }
 
-.lista-resultados li {
-    padding: 0.75rem 0;
-    border-bottom: 1px solid var(--cor-borda);
-}
-
-.lista-resultados a {
-    font-weight: 700;
-}
-
-.lista-resultados p {
-    margin: 0.25rem 0 0;
-    color: var(--cor-texto-suave);
-    font-size: 0.95rem;
-}
-
-/* Acordeão de perguntas (página do tema) */
-
-.acordeao details {
+.resultado {
+    display: block;
+    padding: 0.85rem 1rem;
     border: 1px solid var(--cor-borda);
-    border-radius: var(--raio);
-    margin-bottom: 0.75rem;
-    background: var(--cor-fundo);
+    border-radius: var(--raio-pequeno);
+    text-decoration: none;
+    transition: border-color var(--transicao), background var(--transicao);
 }
 
-.acordeao summary {
-    cursor: pointer;
-    padding: 1rem 1.25rem;
+.resultado:hover {
+    border-color: var(--cor-borda-forte);
+    background: var(--cor-fundo-suave);
+}
+
+.resultado-titulo {
+    display: block;
     font-weight: 700;
     color: var(--cor-primaria);
 }
 
-.acordeao details[open] summary {
-    border-bottom: 1px solid var(--cor-borda);
+.resultado:hover .resultado-titulo {
+    text-decoration: underline;
 }
 
-.acordeao .resposta,
-.acordeao .ligacao-pergunta {
-    padding: 0 1.25rem;
+.resultado-texto {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 0.95rem;
+    color: var(--cor-texto-suave);
+}
+
+/* Acordeão de perguntas (página do tema) */
+
+.acordeao {
+    display: grid;
+    gap: 0.75rem;
+    max-width: 52rem;
+}
+
+.acordeao details {
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio);
+    background: var(--cor-fundo);
+    box-shadow: var(--sombra);
+    transition: border-color var(--transicao), box-shadow var(--transicao);
+}
+
+.acordeao details:hover {
+    border-color: var(--cor-borda-forte);
+}
+
+.acordeao details[open] {
+    border-color: var(--cor-borda-forte);
+    box-shadow: var(--sombra-elevada);
+}
+
+.acordeao summary {
+    position: relative;
+    display: block;
+    list-style: none;
+    cursor: pointer;
+    padding: 1.1rem 3.25rem 1.1rem 1.25rem;
+    border-radius: var(--raio);
+    font-weight: 700;
+    color: var(--cor-primaria);
+}
+
+.acordeao summary::-webkit-details-marker {
+    display: none;
+}
+
+/* Indicador abrir/fechar desenhado só com CSS. */
+.acordeao summary::after {
+    content: "";
+    position: absolute;
+    right: 1.4rem;
+    top: 50%;
+    width: 0.55rem;
+    height: 0.55rem;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: translateY(-70%) rotate(45deg);
+    transition: transform var(--transicao);
+}
+
+.acordeao details[open] > summary::after {
+    transform: translateY(-30%) rotate(-135deg);
+}
+
+.acordeao summary:hover {
+    background: var(--cor-fundo-suave);
+}
+
+.acordeao details[open] > summary {
+    border-bottom: 1px solid var(--cor-borda);
+    border-radius: var(--raio) var(--raio) 0 0;
+}
+
+.acordeao-corpo {
+    padding: 0.25rem 1.25rem 1rem;
 }
 
 .ligacao-pergunta {
+    margin: 0.75rem 0 0;
+    padding-top: 0.75rem;
+    border-top: 1px dashed var(--cor-borda);
     font-size: 0.95rem;
 }
 
-/* Página da pergunta */
+/* Texto da resposta (vem do editor do backoffice) */
+
+.resposta {
+    max-width: var(--largura-texto);
+}
+
+.resposta > :first-child {
+    margin-top: 0.75rem;
+}
+
+.resposta > :last-child {
+    margin-bottom: 0;
+}
+
+.resposta p,
+.resposta ul,
+.resposta ol {
+    margin: 0 0 1rem;
+}
 
 .resposta ul,
 .resposta ol {
     padding-left: 1.5rem;
 }
 
+.resposta li + li {
+    margin-top: 0.3rem;
+}
+
+.resposta li::marker {
+    color: var(--cor-primaria);
+}
+
+/* Página da pergunta */
+
+.pergunta-grelha {
+    display: grid;
+    gap: 2rem;
+    align-items: start;
+}
+
+@media (min-width: 56rem) {
+    .pergunta-grelha {
+        grid-template-columns: minmax(0, 1fr) 18rem;
+        gap: 3rem;
+    }
+}
+
+.pergunta .resposta {
+    font-size: 1.1rem;
+}
+
+.pergunta .resposta > :first-child {
+    margin-top: 0;
+}
+
 .avaliacao {
-    margin-top: 2rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--cor-borda);
+    max-width: var(--largura-texto);
+    margin-top: 2.5rem;
+    padding: 1.1rem 1.25rem;
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio);
+    background: var(--cor-fundo-suave);
+}
+
+.avaliacao form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1.5rem;
 }
 
 .avaliacao h2 {
-    margin: 0 0 0.75rem;
-    font-size: 1.1rem;
+    margin: 0;
+    font-size: 1.05rem;
 }
 
 .avaliacao-botoes {
@@ -346,45 +707,118 @@ main:focus {
 
 .avaliacao-botoes button {
     font: inherit;
-    min-width: 5rem;
-    padding: 0.5rem 1rem;
-    border: 2px solid var(--cor-primaria);
-    border-radius: var(--raio);
+    min-width: 5.5rem;
+    padding: 0.45rem 1.1rem;
+    border: 1px solid var(--cor-primaria);
+    border-radius: 999px;
     background: var(--cor-fundo);
     color: var(--cor-primaria);
     font-weight: 700;
     cursor: pointer;
+    transition: background var(--transicao), color var(--transicao);
 }
 
-.avaliacao-botoes button:hover {
+.avaliacao-botoes button:hover:not(:disabled) {
     background: var(--cor-primaria);
     color: #fff;
 }
 
+.avaliacao-botoes button:disabled {
+    cursor: wait;
+    opacity: 0.6;
+}
+
 /* Fica sempre no documento (mesmo vazio) para os leitores de ecrã anunciarem a mensagem. */
 .avaliacao-estado {
-    margin: 0.5rem 0 0;
+    margin: 0;
     font-weight: 700;
+    color: var(--cor-sucesso);
+}
+
+.avaliacao-estado:empty {
+    display: none;
 }
 
 .tambem {
-    margin-top: 2.5rem;
-    padding: 1rem 1.25rem;
-    background: var(--cor-fundo-suave);
-    border-radius: var(--raio);
+    padding: 1.1rem 1.25rem;
+    border: 1px solid var(--cor-borda);
+    border-left: 4px solid var(--cor-primaria);
+    border-radius: var(--raio-pequeno);
+    background: var(--cor-fundo);
 }
 
 .tambem h2 {
-    margin-top: 0;
-    font-size: 1.1rem;
+    margin: 0 0 0.75rem;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--cor-texto-suave);
 }
 
 .tambem ul {
+    list-style: none;
     margin: 0;
-    padding-left: 1.25rem;
+    padding: 0;
+    display: grid;
+    gap: 0.75rem;
 }
 
-@media (max-width: 30rem) {
+.tambem a {
+    display: block;
+    text-decoration: none;
+    line-height: 1.35;
+}
+
+.tambem-caminho {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--cor-texto-suave);
+}
+
+.tambem-tema {
+    font-weight: 700;
+}
+
+.tambem a:hover .tambem-tema {
+    text-decoration: underline;
+}
+
+/* Rodapé */
+
+.rodape {
+    border-top: 1px solid var(--cor-borda);
+    background: var(--cor-fundo-suave);
+    color: var(--cor-texto-suave);
+    font-size: 0.9rem;
+    padding: 1.5rem 0;
+}
+
+.rodape p {
+    margin: 0;
+}
+
+.rodape-nome {
+    font-weight: 700;
+    color: var(--cor-texto);
+}
+
+/* Ecrãs pequenos */
+
+@media (max-width: 36rem) {
+    .marca-instituicao {
+        display: none;
+    }
+
+    .cabecalho-pesquisa {
+        padding: 0.45rem 0.7rem;
+    }
+
+    .corpo {
+        padding-top: 2rem;
+    }
+}
+
+@media (max-width: 22rem) {
     .pesquisa-linha {
         flex-direction: column;
     }
@@ -394,5 +828,9 @@ main:focus {
     * {
         scroll-behavior: auto !important;
         transition: none !important;
+    }
+
+    .cartao:hover {
+        transform: none;
     }
 }
