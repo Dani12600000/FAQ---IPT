@@ -117,6 +117,35 @@ class ApiTest extends TestCase
             ->assertHeader('Access-Control-Allow-Origin', '*');
     }
 
+    public function test_o_limite_de_pedidos_vem_da_configuracao(): void
+    {
+        config(['faq.limites.api_por_minuto' => 2]);
+
+        $this->getJson('/api/servicos')->assertOk();
+        $this->getJson('/api/servicos')->assertOk();
+        $this->getJson('/api/servicos')->assertTooManyRequests();
+    }
+
+    public function test_os_ips_da_lista_nao_tem_limite(): void
+    {
+        config([
+            'faq.limites.api_por_minuto' => 1,
+            'faq.limites.api_ips_sem_limite' => ['192.0.2.10', '10.0.0.0/24'],
+        ]);
+
+        foreach (['192.0.2.10', '10.0.0.7'] as $ip) {
+            $this->withServerVariables(['REMOTE_ADDR' => $ip]);
+
+            $this->getJson('/api/servicos')->assertOk();
+            $this->getJson('/api/servicos')->assertOk();
+        }
+
+        $this->withServerVariables(['REMOTE_ADDR' => '192.0.2.99']);
+
+        $this->getJson('/api/servicos')->assertOk();
+        $this->getJson('/api/servicos')->assertTooManyRequests();
+    }
+
     public function test_a_documentacao_da_api_esta_disponivel_fora_do_ambiente_local(): void
     {
         $this->assertFalse($this->app->environment('local'));

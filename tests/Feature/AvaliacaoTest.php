@@ -70,14 +70,16 @@ class AvaliacaoTest extends TestCase
         $this->postJson('/p/como-renovo/avaliacao', ['util' => true])->assertNotFound();
     }
 
-    public function test_limita_o_numero_de_avaliacoes_por_minuto(): void
+    public function test_limita_as_avaliacoes_por_minuto_com_o_valor_da_configuracao(): void
     {
-        for ($i = 0; $i < 10; $i++) {
+        config(['faq.limites.avaliacoes_por_minuto' => 2]);
+
+        for ($i = 0; $i < 2; $i++) {
             $this->postJson('/p/como-renovo/avaliacao', ['util' => true])->assertCreated();
         }
 
         $this->postJson('/p/como-renovo/avaliacao', ['util' => true])->assertTooManyRequests();
-        $this->assertSame(10, Avaliacao::count());
+        $this->assertSame(2, Avaliacao::count());
     }
 
     public function test_nao_cria_cookies_alem_dos_tecnicos_do_laravel(): void

@@ -22,7 +22,7 @@ Route::get('/', [FaqController::class, 'inicio'])->name('faq.inicio');
 Route::get('/pesquisa', PesquisaController::class)->name('faq.pesquisa');
 Route::get('/p/{pergunta}', [FaqController::class, 'canonica'])->name('faq.canonica');
 Route::post('/p/{pergunta}/avaliacao', AvaliacaoController::class)
-    ->middleware('throttle:10,1') // no máximo 10 avaliações por minuto por IP
+    ->middleware('throttle:avaliacoes') // limite por IP, ver config/faq.php
     ->name('faq.avaliar');
 
 Route::get('/{servico}', [FaqController::class, 'servico'])->name('faq.servico');

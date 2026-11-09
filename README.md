@@ -184,7 +184,7 @@ O URL guarda o caminho por onde a pessoa chegou:
 
 - **Validação da cadeia:** a categoria tem de pertencer ao serviço, o tema à categoria e a pergunta ao tema, e tudo tem de estar ativo/publicado. Caso contrário, a página dá 404 (ver `FaqController`).
 - A página da pergunta tem `<link rel="canonical">` para `/p/{pergunta}` e mostra **"Também aparece em"** com os outros caminhos.
-- **"Esta resposta foi útil?"** grava sim/não em `avaliacoes`, sem contas e sem cookies de rastreio. Há um limite de 10 avaliações por minuto por IP.
+- **"Esta resposta foi útil?"** grava sim/não em `avaliacoes`, sem contas e sem cookies de rastreio. Há um limite de avaliações por minuto por IP (ver [Limites de pedidos](#limites-de-pedidos)).
 - **Pesquisa** na pergunta e na resposta (sem HTML). Os resultados aparecem enquanto se escreve. Cada pesquisa fica registada em `pesquisas` com o número de resultados, mas enquanto se escreve só é registada quando a pessoa pára 1,5 s (para não guardar "pro", "propi"…).
 - **schema.org FAQPage** (JSON-LD) nas páginas de tema e de pergunta.
 - **Sem JavaScript tudo funciona:** a pesquisa envia o formulário e o "foi útil?" recarrega a página.
@@ -219,7 +219,7 @@ Em `/admin` (Filament).
 
 ## API JSON
 
-Pública, só de leitura, com o prefixo `/api`. Só devolve conteúdo ativo/publicado. Limite: 60 pedidos por minuto por IP. As respostas vêm dentro de `data`, como é habitual nas API Resources do Laravel.
+Pública, só de leitura, com o prefixo `/api`. Só devolve conteúdo ativo/publicado. Tem um limite de pedidos por minuto por IP (ver [Limites de pedidos](#limites-de-pedidos)). As respostas vêm dentro de `data`, como é habitual nas API Resources do Laravel.
 
 | Pedido | Devolve |
 | --- | --- |
@@ -278,6 +278,20 @@ Notas para quem integrar:
   ```
 
   O valor `*` (por defeito) aceita qualquer site.
+
+### Limites de pedidos
+
+Na rede do IPT muitas pessoas saem para a Internet com o mesmo IP e, se o site do IPT chamar a API a partir do servidor, todos os pedidos vêm de um só IP. Por isso os limites são altos e configuram-se no `.env`:
+
+| Variável | Por omissão | O que faz |
+| --- | --- | --- |
+| `API_LIMITE_POR_MINUTO` | 600 | Pedidos à API por minuto e por IP |
+| `AVALIACOES_LIMITE_POR_MINUTO` | 60 | Respostas a "Esta resposta foi útil?" por minuto e por IP |
+| `API_IPS_SEM_LIMITE` | vazio | IPs ou redes que chamam a API sem limite, separados por vírgulas (por exemplo, `193.137.0.10,10.0.0.0/24`) |
+
+Quem passa o limite recebe o erro `429 Too Many Requests`.
+
+**Atenção:** se a aplicação ficar atrás de um *reverse proxy* ou balanceador, o Laravel vê o IP do proxy em todos os pedidos, a menos que se configure `trustProxies` em `bootstrap/app.php`. Sem isso, os limites são partilhados por toda a gente, e pôr o IP do proxy nesta lista tira o limite a todos.
 
 ## Testes
 
