@@ -8,11 +8,15 @@ use App\Filament\Widgets\PerguntasMaisUteis;
 use App\Filament\Widgets\PerguntasMenosUteis;
 use App\Filament\Widgets\PerguntasSemTema;
 use App\Filament\Widgets\PesquisasSemResultados;
+use App\Filament\Widgets\RespostasARever;
 use App\Models\Pergunta;
 use App\Models\Pesquisa;
+use App\Models\Servico;
 use App\Models\Tema;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -35,7 +39,8 @@ class PainelBackofficeTest extends TestCase
             ->assertSeeLivewire(PesquisasSemResultados::class)
             ->assertSeeLivewire(PerguntasMaisUteis::class)
             ->assertSeeLivewire(PerguntasMenosUteis::class)
-            ->assertSeeLivewire(PerguntasSemTema::class);
+            ->assertSeeLivewire(PerguntasSemTema::class)
+            ->assertSeeLivewire(RespostasARever::class);
     }
 
     public function test_mostra_as_pesquisas_sem_resultados_agrupadas_por_termo(): void
@@ -77,6 +82,47 @@ class PainelBackofficeTest extends TestCase
             ->assertCanNotSeeTableRecords([$ligada]);
     }
 
+    public function test_mostra_as_respostas_cuja_revisao_passou_ou_esta_proxima(): void
+    {
+        $passada = $this->perguntaComRevisao('Passada?', today()->subDay());
+        $limite = $this->perguntaComRevisao('No limite?', today()->addDays(30));
+        $depois = $this->perguntaComRevisao('Depois?', today()->addDays(31));
+        $semData = $this->perguntaComRevisao('Sem data?', null);
+
+        Livewire::test(RespostasARever::class)
+            ->assertCanSeeTableRecords([$passada, $limite], inOrder: true)
+            ->assertCanNotSeeTableRecords([$depois, $semData]);
+    }
+
+    public function test_cada_editor_so_ve_as_respostas_a_rever_do_seu_servico(): void
+    {
+        $biblioteca = Servico::create(['nome' => 'Biblioteca', 'slug' => 'biblioteca']);
+        $acaoSocial = Servico::create(['nome' => 'Ação Social', 'slug' => 'acao-social']);
+        $sua = $this->perguntaComRevisao('Da biblioteca?', today(), $biblioteca);
+        $outra = $this->perguntaComRevisao('Da ação social?', today(), $acaoSocial);
+
+        $editor = User::factory()->create();
+        $editor->servicos()->attach($biblioteca);
+        $this->actingAs($editor);
+
+        Livewire::test(RespostasARever::class)
+            ->assertCanSeeTableRecords([$sua])
+            ->assertCanNotSeeTableRecords([$outra]);
+    }
+
+    public function test_grava_a_data_de_revisao_no_formulario(): void
+    {
+        $servico = Servico::create(['nome' => 'Biblioteca', 'slug' => 'biblioteca']);
+        $pergunta = $this->perguntaComRevisao('A rever?', null, $servico);
+
+        Livewire::test(EditPergunta::class, ['record' => $pergunta->getRouteKey()])
+            ->fillForm(['rever_ate' => '2027-01-15'])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertSame('2027-01-15', $pergunta->fresh()->rever_ate->format('Y-m-d'));
+    }
+
     public function test_pre_visualiza_o_que_esta_no_formulario_antes_de_gravar(): void
     {
         $pergunta = Pergunta::create(['pergunta' => 'Original?', 'slug' => 'original', 'resposta' => '<p>Resposta guardada</p>']);
@@ -113,6 +159,17 @@ class PainelBackofficeTest extends TestCase
         Livewire::test(EditPergunta::class, ['record' => $pergunta->getRouteKey()])
             ->assertActionVisible('verNoSite')
             ->assertActionHasUrl('verNoSite', route('faq.canonica', 'rascunho'));
+    }
+
+    private function perguntaComRevisao(string $texto, ?CarbonInterface $data, ?Servico $servico = null): Pergunta
+    {
+        return Pergunta::create([
+            'servico_id' => $servico?->id,
+            'pergunta' => $texto,
+            'slug' => Str::slug($texto),
+            'resposta' => '<p>Resposta de exemplo.</p>',
+            'rever_ate' => $data,
+        ]);
     }
 
     private function perguntaAvaliada(string $texto, int $sim, int $nao): Pergunta

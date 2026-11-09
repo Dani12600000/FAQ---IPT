@@ -15,7 +15,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-#[Fillable(['servico_id', 'pergunta', 'slug', 'resposta', 'publicada'])]
+#[Fillable(['servico_id', 'pergunta', 'slug', 'resposta', 'publicada', 'rever_ate'])]
 class Pergunta extends Model
 {
     use TemServicoResponsavel;
@@ -277,6 +277,15 @@ class Pergunta extends Model
     }
 
     /**
+     * Perguntas cuja data de revisão já passou ou passa nos próximos dias.
+     */
+    #[Scope]
+    protected function aRever(Builder $query, int $dias = 30): void
+    {
+        $query->whereDate($query->qualifyColumn('rever_ate'), '<=', today()->addDays($dias));
+    }
+
+    /**
      * Perguntas que a pessoa vê no backoffice: as do seu serviço e as de outros serviços
      * que usa nos seus temas.
      */
@@ -319,6 +328,7 @@ class Pergunta extends Model
         return [
             'publicada' => 'boolean',
             'origem_versao' => 'integer',
+            'rever_ate' => 'date',
         ];
     }
 }

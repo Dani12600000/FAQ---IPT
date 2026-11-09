@@ -7,6 +7,7 @@ use App\Filament\Forms\CampoServicoResponsavel;
 use App\Models\Pergunta;
 use App\Models\Tema;
 use App\Services\PerguntasSemelhantes;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
@@ -68,6 +69,10 @@ class PerguntaForm
                 Toggle::make('publicada')
                     ->label('Publicada')
                     ->helperText('Uma pergunta por publicar fica guardada como rascunho e não aparece no site nem na API.')
+                    ->hidden($usaExistente),
+                DatePicker::make('rever_ate')
+                    ->label('Rever até')
+                    ->helperText('Opcional. A partir de 30 dias antes desta data, a resposta aparece no painel em "Respostas a rever".')
                     ->hidden($usaExistente),
             ]);
     }

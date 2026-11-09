@@ -149,7 +149,7 @@ tests/Feature/                  testes
 | `servicos` | nome, slug (único), descricao, **ordem** (ordem na página inicial), ativo |
 | `categorias` | **servico_id** (responsável), nome, slug, descricao, ativo |
 | `temas` | **servico_id** (responsável), nome, slug, descricao, ativo |
-| `perguntas` | **servico_id** (responsável), origem_id e origem_versao (versão própria), pergunta, slug, resposta (HTML), resposta_texto (sem HTML, para a pesquisa), publicada |
+| `perguntas` | **servico_id** (responsável), origem_id e origem_versao (versão própria), pergunta, slug, resposta (HTML), resposta_texto (sem HTML, para a pesquisa), publicada, rever_ate (data de revisão, opcional) |
 | `pergunta_versoes` | pergunta_id, numero, pergunta, resposta, nota, user_id (autor), created_at |
 | `servico_user` | servico_id, user_id (serviços de cada editor) |
 | `servico_categoria` | servico_id, categoria_id, **ordem** (chave primária no par) |
@@ -201,7 +201,8 @@ Em `/admin` (Filament).
 - **Ordenar:** dentro de um serviço, categoria ou tema, na tabela do fundo da página de edição, botão **"Reordenar registos"**. Arrasta-se ou usam-se as setas do teclado. A lista de serviços também se reordena.
 - **Resposta** com editor de texto rico (negrito, itálico, ligações, títulos, listas).
 - **Pré-visualizar** a pergunta tal como está escrita, mesmo antes de gravar, e **Ver no site** quando está publicada.
-- **Painel de Controlo:** pesquisas sem resultados, perguntas mais e menos úteis, perguntas sem tema.
+- **Painel de Controlo:** pesquisas sem resultados, perguntas mais e menos úteis, perguntas sem tema e respostas a rever.
+- **Data de revisão:** ao editar uma pergunta, o campo opcional **"Rever até"** indica até quando a resposta deve ser revista. O widget "Respostas a rever" mostra as que têm essa data já passada ou nos próximos 30 dias; cada editor vê só as do seu serviço.
 - **Papéis:** o **administrador** gere tudo, incluindo utilizadores e serviços. O **editor** gere só o conteúdo e não vê o menu Utilizadores.
 - **Editores por serviço:** o administrador atribui a cada editor um ou mais serviços (em Utilizadores). O editor:
   - só altera as categorias, temas e perguntas cujo **serviço responsável** é um dos seus, e só altera os seus serviços (não cria, apaga nem reordena serviços);
