@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Pergunta;
 use App\Models\Pesquisa;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -95,6 +96,32 @@ class PesquisaTest extends TestCase
         $this->get('/pesquisa?q=a');
 
         $this->assertSame(0, Pesquisa::count());
+    }
+
+    public function test_apaga_as_pesquisas_mais_antigas_do_que_o_prazo(): void
+    {
+        $this->travelTo('2025-01-10 12:00:00');
+        Pesquisa::create(['termo' => 'antiga', 'resultados' => 0]);
+
+        $this->travelTo('2025-06-10 12:00:00');
+        Pesquisa::create(['termo' => 'recente', 'resultados' => 0]);
+
+        $this->travelTo('2026-02-10 12:00:00');
+        $this->artisan('model:prune')->assertSuccessful();
+
+        $this->assertSame(['recente'], Pesquisa::pluck('termo')->all());
+
+        config(['faq.pesquisas_meses_a_guardar' => 6]);
+        $this->artisan('model:prune')->assertSuccessful();
+
+        $this->assertSame(0, Pesquisa::count());
+    }
+
+    public function test_a_limpeza_das_pesquisas_esta_agendada(): void
+    {
+        $comandos = collect(app(Schedule::class)->events())->map(fn ($evento) => $evento->command);
+
+        $this->assertTrue($comandos->contains(fn (?string $comando) => str_contains((string) $comando, 'model:prune')));
     }
 
     private function pergunta(string $texto, string $slug, string $resposta, bool $publicada = true): Pergunta

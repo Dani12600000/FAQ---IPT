@@ -351,6 +351,14 @@ Resumo dos passos específicos deste projeto. O resto segue o [guia de deploymen
 
    A partir daí, os outros utilizadores criam-se no backoffice, em **Administração → Utilizadores**.
 
+5. Ativar as tarefas agendadas. O Laravel tem um agendador próprio (`routes/console.php`), mas é preciso que o cron do servidor o chame a cada minuto:
+
+   ```
+   * * * * * cd /caminho/para/o/projeto && php artisan schedule:run >> /dev/null 2>&1
+   ```
+
+   A única tarefa agendada é o `model:prune`, que corre todos os dias e **apaga as pesquisas com mais de 12 meses**, porque os termos pesquisados podem ter dados pessoais (nomes, números de aluno). O prazo muda-se com `PESQUISAS_MESES_A_GUARDAR` no `.env`. Sem este cron, as pesquisas nunca são apagadas. Para confirmar o que está agendado: `php artisan schedule:list`.
+
 ## Personalizar o aspeto
 
 - **Site público:** as cores e o tipo de letra são variáveis no topo de `public/css/site.css` (`--cor-primaria`, etc.). As cores atuais são provisórias, à espera do guia de identidade visual do IPT. Ao mudá-las, convém manter o contraste mínimo de 4,5:1.

@@ -10,6 +10,9 @@ return [
     // a aparecer no site como perguntas normais.
     'versao_propria' => env('FAQ_VERSAO_PROPRIA', true),
 
+    // Durante quantos meses se guardam as pesquisas feitas no site (podem ter dados pessoais).
+    'pesquisas_meses_a_guardar' => (int) env('PESQUISAS_MESES_A_GUARDAR', 12),
+
     // Pedidos por minuto e por IP. Os valores são altos porque, na rede do IPT, muitas
     // pessoas saem para a Internet com o mesmo IP.
     'limites' => [
