@@ -22,7 +22,8 @@ return [
 
     // Sites que podem chamar a API a partir do browser (por exemplo, o widget no site do IPT),
     // separados por vírgulas: CORS_ALLOWED_ORIGINS=https://www.ipt.pt,https://portal.ipt.pt
-    'allowed_origins' => array_filter(array_map('trim', explode(',', env('CORS_ALLOWED_ORIGINS', '*')))),
+    // Sem a variável, aceita qualquer site em ambiente local e nenhum fora dele.
+    'allowed_origins' => array_filter(array_map('trim', explode(',', env('CORS_ALLOWED_ORIGINS', env('APP_ENV') === 'local' ? '*' : '')))),
 
     'allowed_origins_patterns' => [],
 

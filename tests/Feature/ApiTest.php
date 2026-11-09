@@ -111,10 +111,56 @@ class ApiTest extends TestCase
         $this->assertStringNotContainsString('onclick', $resposta);
     }
 
-    public function test_permite_pedidos_de_outros_sites_cors(): void
+    public function test_o_cors_so_aceita_os_sites_configurados(): void
     {
+        config(['cors.allowed_origins' => ['https://www.ipt.pt', 'https://portal.ipt.pt']]);
+
+        $this->getJson('/api/servicos', ['Origin' => 'https://portal.ipt.pt'])
+            ->assertHeader('Access-Control-Allow-Origin', 'https://portal.ipt.pt');
+
+        $this->getJson('/api/servicos', ['Origin' => 'https://outro-site.example'])
+            ->assertHeaderMissing('Access-Control-Allow-Origin');
+    }
+
+    public function test_com_a_lista_de_sites_vazia_o_cors_nao_aceita_nenhum_site(): void
+    {
+        config(['cors.allowed_origins' => []]);
+
         $this->getJson('/api/servicos', ['Origin' => 'https://www.ipt.pt'])
-            ->assertHeader('Access-Control-Allow-Origin', '*');
+            ->assertHeaderMissing('Access-Control-Allow-Origin');
+    }
+
+    public function test_sem_a_variavel_o_cors_so_fica_aberto_em_ambiente_local(): void
+    {
+        $this->assertSame(['*'], $this->origensCors('local', null));
+        $this->assertSame([], $this->origensCors('production', null));
+        $this->assertSame(['https://www.ipt.pt'], $this->origensCors('production', 'https://www.ipt.pt'));
+    }
+
+    /**
+     * Lê config/cors.php como se o .env tivesse estes valores.
+     *
+     * @return array<int, string>
+     */
+    private function origensCors(string $ambiente, ?string $origens): array
+    {
+        $variaveis = ['APP_ENV' => $ambiente, 'CORS_ALLOWED_ORIGINS' => $origens];
+        $originais = array_map(fn (string $nome) => getenv($nome) ?: null, array_combine(array_keys($variaveis), array_keys($variaveis)));
+
+        $definir = function (array $valores): void {
+            foreach ($valores as $nome => $valor) {
+                unset($_SERVER[$nome], $_ENV[$nome]);
+                putenv($valor === null ? $nome : "{$nome}={$valor}");
+            }
+        };
+
+        $definir($variaveis);
+
+        try {
+            return array_values((require config_path('cors.php'))['allowed_origins']);
+        } finally {
+            $definir($originais);
+        }
     }
 
     public function test_o_limite_de_pedidos_vem_da_configuracao(): void

@@ -277,7 +277,7 @@ Notas para quem integrar:
   CORS_ALLOWED_ORIGINS=https://www.ipt.pt,https://portal.ipt.pt
   ```
 
-  O valor `*` (por defeito) aceita qualquer site.
+  Sem esta variável, a API aceita qualquer site só com `APP_ENV=local`. Em produção, sem a variável, **não aceita nenhum site externo** (os pedidos feitos a partir de um servidor não são afetados, porque o CORS só existe nos browsers). O valor `*` aceita qualquer site em qualquer ambiente.
 
 ### Limites de pedidos
 
