@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -43,6 +44,17 @@ class Pergunta extends Model
     public function versoes(): HasMany
     {
         return $this->hasMany(PerguntaVersao::class)->orderByDesc('numero');
+    }
+
+    /**
+     * Versão mais recente. A sua data é a da última alteração do texto, ao contrário de
+     * updated_at, que muda com qualquer gravação (o slug, a publicação...).
+     *
+     * @return HasOne<PerguntaVersao, $this>
+     */
+    public function ultimaVersao(): HasOne
+    {
+        return $this->hasOne(PerguntaVersao::class)->latestOfMany('numero');
     }
 
     /**

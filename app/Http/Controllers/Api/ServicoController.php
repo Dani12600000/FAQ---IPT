@@ -44,7 +44,7 @@ class ServicoController extends Controller
                 ->ativas()
                 ->with(['temas' => fn (BelongsToMany $temas) => $temas
                     ->ativos()
-                    ->with(['perguntas' => fn (BelongsToMany $perguntas) => $perguntas->publicadas()]),
+                    ->with(['perguntas' => fn (BelongsToMany $perguntas) => $perguntas->publicadas()->with('ultimaVersao')]),
                 ]),
             ])
             ->firstOrFail();

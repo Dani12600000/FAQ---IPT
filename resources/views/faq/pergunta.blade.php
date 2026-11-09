@@ -40,6 +40,13 @@
                 <div class="resposta">
                     {!! $pergunta->respostaSegura() !!}
                 </div>
+
+                @if ($pergunta->ultimaVersao)
+                    <p class="pergunta-atualizada">
+                        Atualizado em
+                        <time datetime="{{ $pergunta->ultimaVersao->created_at->toDateString() }}">{{ $pergunta->ultimaVersao->created_at->format('d/m/Y') }}</time>
+                    </p>
+                @endif
             </article>
 
             <x-avaliacao :pergunta="$pergunta" />

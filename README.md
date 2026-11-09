@@ -184,6 +184,7 @@ O URL guarda o caminho por onde a pessoa chegou:
 
 - **Validação da cadeia:** a categoria tem de pertencer ao serviço, o tema à categoria e a pergunta ao tema, e tudo tem de estar ativo/publicado. Caso contrário, a página dá 404 (ver `FaqController`).
 - A página da pergunta tem `<link rel="canonical">` para `/p/{pergunta}` e mostra **"Também aparece em"** com os outros caminhos.
+- **"Atualizado em"** na página da pergunta (e `atualizado_em` na API) é a data da última versão do texto, por isso não muda ao alterar só o slug, a publicação ou a data de revisão.
 - **"Esta resposta foi útil?"** grava sim/não em `avaliacoes`, sem contas e sem cookies de rastreio. Há um limite de avaliações por minuto por IP (ver [Limites de pedidos](#limites-de-pedidos)).
 - **Pesquisa** na pergunta e na resposta (sem HTML). Os resultados aparecem enquanto se escreve. Cada pesquisa fica registada em `pesquisas` com o número de resultados, mas enquanto se escreve só é registada quando a pessoa pára 1,5 s (para não guardar "pro", "propi"…).
 - **schema.org FAQPage** (JSON-LD) nas páginas de tema e de pergunta.

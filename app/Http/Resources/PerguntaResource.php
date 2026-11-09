@@ -26,6 +26,8 @@ class PerguntaResource extends JsonResource
             'resposta' => $this->respostaSegura(),
             'resposta_texto' => $this->resposta_texto,
             'url' => route('faq.canonica', $this->slug),
+            // Data da última alteração do texto da pergunta ou da resposta (ISO 8601).
+            'atualizado_em' => $this->ultimaVersao?->created_at->toIso8601String(),
             // Posição dentro do tema (só quando a pergunta vem de um tema).
             'ordem' => $this->whenPivotLoaded('tema_pergunta', fn (): int => $this->pivot->ordem),
             // Onde a pergunta aparece no site (só no detalhe da pergunta).

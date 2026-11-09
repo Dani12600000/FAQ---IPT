@@ -53,6 +53,7 @@ class PesquisaFaq
 
         return Pergunta::publicadas()
             ->pesquisa($termo)
+            ->with('ultimaVersao')
             ->get()
             ->sortByDesc(fn (Pergunta $pergunta) => collect($palavras)
                 ->filter(fn (string $palavra) => Str::contains(Str::ascii(mb_strtolower($pergunta->pergunta)), $palavra))

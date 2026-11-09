@@ -163,6 +163,22 @@ class ApiTest extends TestCase
         }
     }
 
+    public function test_inclui_a_data_da_ultima_alteracao_do_texto(): void
+    {
+        $this->travelTo('2026-03-10 12:00:00');
+        $pergunta = Pergunta::firstWhere('slug', 'como-renovo');
+        $pergunta->update(['resposta' => '<p>Resposta de exemplo, revista.</p>']);
+
+        $this->travelTo('2026-05-20 12:00:00');
+        $pergunta->update(['rever_ate' => '2027-01-01']);
+
+        $data = now()->setDateTime(2026, 3, 10, 12, 0)->toIso8601String();
+
+        $this->getJson('/api/perguntas/como-renovo')->assertJsonPath('data.atualizado_em', $data);
+        $this->getJson('/api/servicos/biblioteca')->assertJsonPath('data.categorias.0.temas.0.perguntas.0.atualizado_em', $data);
+        $this->getJson('/api/pesquisa?q=renovo')->assertJsonPath('data.0.atualizado_em', $data);
+    }
+
     public function test_o_limite_de_pedidos_vem_da_configuracao(): void
     {
         config(['faq.limites.api_por_minuto' => 2]);

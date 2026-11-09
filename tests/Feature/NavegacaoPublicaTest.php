@@ -103,6 +103,20 @@ class NavegacaoPublicaTest extends TestCase
         $this->get('/p/como-me-candidato')->assertSee($canonico, false);
     }
 
+    public function test_atualizado_em_so_muda_quando_muda_o_texto(): void
+    {
+        $this->travelTo('2026-03-10 12:00:00');
+        $this->pergunta->update(['resposta' => '<p>Resposta de exemplo, revista.</p>']);
+
+        $this->travelTo('2026-05-20 12:00:00');
+        $this->pergunta->update(['rever_ate' => '2027-01-01']);
+
+        $this->get('/p/como-me-candidato')
+            ->assertSee('Atualizado em')
+            ->assertSee('10/03/2026')
+            ->assertDontSee('20/05/2026');
+    }
+
     public function test_mostra_os_outros_caminhos_onde_a_pergunta_aparece(): void
     {
         $internacional = Servico::create(['nome' => 'Internacional', 'slug' => 'internacional']);
