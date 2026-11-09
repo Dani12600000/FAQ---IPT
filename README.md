@@ -213,6 +213,8 @@ Em `/admin` (Filament).
   - **Comparar com a original:** a base comum, a original agora e a cópia, lado a lado;
   - **Trazer o texto da original** ou **Manter o meu texto**, quando a original mudou (o aviso no topo da página diz quando);
   - **Voltar a usar a original:** nos temas onde a cópia aparece volta a aparecer a original, e a cópia fica por publicar e sem temas, com o seu histórico.
+
+  Esta funcionalidade está **congelada** até se decidir se fica, porque reintroduz respostas duplicadas. Com `FAQ_VERSAO_PROPRIA=false` no `.env` desaparecem do backoffice a ação de criar e o menu "Versão própria". As cópias que já existam continuam a aparecer no site como perguntas normais.
 - **Histórico de versões:** ao editar uma pergunta, a tabela "Histórico de versões" mostra cada versão (autor, data e nota), permite **Ver** o texto dessa versão e **Repor** uma versão antiga.
 
 ## API JSON

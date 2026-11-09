@@ -43,7 +43,7 @@ class CriarVersaoPropriaAction
                     ->options($servicos($record)->pluck('nome', 'id'))
                     ->required(),
             ] : [])
-            ->visible(fn (Pergunta $record): bool => $servicos($record)->isNotEmpty())
+            ->visible(fn (Pergunta $record): bool => config('faq.versao_propria') && $servicos($record)->isNotEmpty())
             ->action(function (Pergunta $record, array $data, Component $livewire) use ($servicos): void {
                 $servico = $servicos($record)->firstWhere('id', $data['servico_id'] ?? null) ?? $servicos($record)->first();
                 $copia = $record->derivarPara($servico);

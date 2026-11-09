@@ -27,7 +27,7 @@ class EditPergunta extends EditRecord
     {
         $origem = $this->record->origem;
 
-        if (! $origem) {
+        if (! $origem || ! config('faq.versao_propria')) {
             return null;
         }
 
@@ -120,7 +120,7 @@ class EditPergunta extends EditRecord
             ->icon(Heroicon::OutlinedDocumentDuplicate)
             ->color('gray')
             ->button()
-            ->visible(fn (): bool => $this->record->origem !== null);
+            ->visible(fn (): bool => config('faq.versao_propria') && $this->record->origem !== null);
     }
 
     /**

@@ -198,6 +198,26 @@ class VersaoPropriaTest extends TestCase
             ->assertActionHidden('voltarAOriginal');
     }
 
+    public function test_desligada_nao_se_criam_nem_gerem_versoes_proprias(): void
+    {
+        config(['faq.versao_propria' => false]);
+        $this->actingAs($this->editorDe($this->acaoSocial));
+
+        Livewire::test(ListPerguntas::class)
+            ->assertTableActionHidden('criarVersaoPropria', $this->original);
+
+        $copia = $this->original->derivarPara($this->acaoSocial);
+        $this->actingAs(User::factory()->admin()->create());
+
+        Livewire::test(EditPergunta::class, ['record' => $copia->getRouteKey()])
+            ->assertActionHidden('compararComOriginal')
+            ->assertActionHidden('voltarAOriginal')
+            ->assertDontSee('Versão própria de');
+
+        Livewire::test(ListPerguntas::class)
+            ->assertDontSee('Versão própria de');
+    }
+
     private function editorDe(Servico $servico): User
     {
         $editor = User::factory()->create();
