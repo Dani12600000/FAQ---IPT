@@ -165,10 +165,32 @@ GET /api/pesquisa?q=
 - Login dos editores: contas próprias ou conta do IPT (LDAP/SSO)?
 - Guia de identidade visual do IPT.
 
-## Primeiro passo sugerido
+## Tarefas pendentes (revisão de 9 nov 2026)
 
-1. Verificar PHP e Composer.
-2. Criar o projeto Laravel.
-3. Ligar ao `faq_ipt`.
-4. Criar as migrações e os modelos com as relações.
-5. Correr `php artisan migrate`.
+A prova de conceito está feita e já vai além do plano (editores por serviço, histórico de versões, perguntas semelhantes, versão própria). Faz estas tarefas **por ordem**, uma de cada vez, com um commit por tarefa (Conventional Commits em inglês). Corre `php artisan test` no fim de cada uma. Quando terminares uma, marca-a aqui com `[x]`.
+
+### 1. Correções
+
+- [x] **Testes a falhar.** Corre `php artisan test` e corrige o que falhar. Na última execução (5 nov) falharam 19, sobretudo em `PermissoesPorServicoTest`, `VersoesPerguntaTest`, `VersaoPropriaTest`, `PainelBackofficeTest`, `BackofficeTest` e `ApiTest` (documentação da API). Se for um problema do ambiente, explica ao Daniel em vez de mudar os testes. Apaga o `tests/Feature/ExampleTest.php` se só testar a página de boas-vindas do Laravel.
+- [x] **Congelar a "versão própria".** Não acrescentes mais nada a esta funcionalidade até o Dr. Joaquim Pombo decidir se fica, porque reintroduz respostas duplicadas. Põe-na atrás de uma opção de configuração (`FAQ_VERSAO_PROPRIA`, ligada por omissão), para se poder desligar sem mexer no código.
+
+### 2. Rede do IPT e API
+
+- [x] **Limites de pedidos configuráveis.** Hoje são 10 avaliações e 60 pedidos à API por minuto e por IP. Na rede do IPT muitos utilizadores partilham o mesmo IP, e se o site do IPT chamar a API a partir do servidor, todos os pedidos vêm de um só IP. Passa os limites para o `.env` (com valores por omissão mais altos) e acrescenta uma lista de IPs sem limite (`API_IPS_SEM_LIMITE`), para o servidor do IPT. Documenta no README.
+- [x] **CORS fechado em produção.** Hoje, sem `CORS_ALLOWED_ORIGINS`, a API aceita qualquer site. Mantém `*` só em ambiente local; em produção, sem a variável, não aceita nenhuma origem externa. Documenta no README.
+
+### 3. Conteúdo sempre atual
+
+- [x] **Data de revisão das respostas.** Campo opcional "rever até" na pergunta. Widget no painel com as respostas cuja data já passou ou passa nos próximos 30 dias (cada editor vê só as do seu serviço).
+- [x] **"Atualizado em".** Mostra na página da pergunta a data da última alteração do texto (a data da última versão, não a de qualquer gravação). Inclui-a também na API.
+- [x] **Contactos de cada serviço.** Campos opcionais email, telefone, horário de atendimento e endereço da página do serviço. Mostra-os na página do serviço e, na página da pergunta, quando alguém responde "Não" a "Esta resposta foi útil?" ("Precisa de mais ajuda? Contacte…"). Inclui-os na API.
+
+### 4. Privacidade e manutenção
+
+- [x] **Apagar pesquisas antigas.** As pesquisas guardadas podem ter dados pessoais (nomes, números de aluno). Apaga automaticamente as que tiverem mais de 12 meses (configurável), com `MassPrunable` no modelo `Pesquisa` e `model:prune` no agendador. Documenta o cron no README.
+- [x] **`sitemap.xml` e `robots.txt`**, com os serviços, categorias e temas ativos e as perguntas publicadas (pelo URL canónico `/p/{pergunta}`).
+
+### Não fazer ainda (depende de decisões)
+
+- Identidade visual do IPT: espera pelo guia.
+- Versão em inglês, integração no site do IPT e login dos editores (contas próprias ou conta do IPT): esperam pelas respostas do Dr. Joaquim Pombo.
