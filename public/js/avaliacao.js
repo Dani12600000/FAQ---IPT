@@ -33,6 +33,11 @@
                     formulario.hidden = true;
                     formulario.parentElement.classList.add('avaliacao-respondida');
                     estado.textContent = json.mensagem;
+
+                    var ajuda = formulario.parentElement.querySelector('[data-avaliacao-ajuda]');
+                    if (ajuda && dados.get('util') === '0') {
+                        ajuda.hidden = false;
+                    }
                 })
                 .catch(function () {
                     formulario.querySelectorAll('button').forEach(function (botao) {

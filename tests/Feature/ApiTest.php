@@ -163,6 +163,18 @@ class ApiTest extends TestCase
         }
     }
 
+    public function test_inclui_os_contactos_do_servico(): void
+    {
+        $this->servico->update(['email' => 'biblioteca@example.com', 'pagina_url' => 'https://example.com/biblioteca']);
+
+        $this->getJson('/api/servicos')
+            ->assertJsonPath('data.0.contactos.email', 'biblioteca@example.com')
+            ->assertJsonPath('data.0.contactos.telefone', null);
+
+        $this->getJson('/api/servicos/biblioteca')
+            ->assertJsonPath('data.contactos.pagina_url', 'https://example.com/biblioteca');
+    }
+
     public function test_inclui_a_data_da_ultima_alteracao_do_texto(): void
     {
         $this->travelTo('2026-03-10 12:00:00');

@@ -76,6 +76,7 @@ class FaqController extends Controller
             'pergunta' => $pergunta,
             'caminho' => compact('servico', 'categoria', 'tema'),
             'outrosCaminhos' => $outrosCaminhos,
+            'servicoContactos' => $servico,
         ]);
     }
 
@@ -85,11 +86,14 @@ class FaqController extends Controller
     public function canonica(string $pergunta): View
     {
         $pergunta = Pergunta::publicadas()->where('slug', $pergunta)->firstOrFail();
+        $caminhos = $pergunta->caminhos();
 
         return view('faq.pergunta', [
             'pergunta' => $pergunta,
             'caminho' => null,
-            'outrosCaminhos' => $pergunta->caminhos(),
+            'outrosCaminhos' => $caminhos,
+            // Sem caminho, os contactos são os do serviço responsável pela pergunta.
+            'servicoContactos' => $pergunta->servico?->ativo ? $pergunta->servico : ($caminhos->first()['servico'] ?? null),
         ]);
     }
 

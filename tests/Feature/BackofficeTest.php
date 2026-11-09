@@ -21,6 +21,30 @@ class BackofficeTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_grava_os_contactos_do_servico_e_so_aceita_paginas_http(): void
+    {
+        $servico = Servico::create(['nome' => 'Biblioteca', 'slug' => 'biblioteca']);
+        $this->actingAs(User::factory()->admin()->create());
+
+        Livewire::test(EditServico::class, ['record' => $servico->getRouteKey()])
+            ->fillForm(['pagina_url' => 'javascript://example.com/%0Aalert(1)'])
+            ->call('save')
+            ->assertHasFormErrors(['pagina_url']);
+
+        Livewire::test(EditServico::class, ['record' => $servico->getRouteKey()])
+            ->fillForm([
+                'email' => 'biblioteca@example.com',
+                'telefone' => '+351 200 000 000',
+                'horario' => 'Dias úteis, das 9h às 17h',
+                'pagina_url' => 'https://example.com/biblioteca',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertTrue($servico->fresh()->temContactos());
+        $this->assertSame('https://example.com/biblioteca', $servico->fresh()->pagina_url);
+    }
+
     public function test_quem_nao_tem_sessao_e_enviado_para_o_login(): void
     {
         $this->get('/admin/perguntas')->assertRedirect('/admin/login');

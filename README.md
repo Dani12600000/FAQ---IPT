@@ -146,7 +146,7 @@ tests/Feature/                  testes
 
 | Tabela | Campos principais |
 | --- | --- |
-| `servicos` | nome, slug (único), descricao, **ordem** (ordem na página inicial), ativo |
+| `servicos` | nome, slug (único), descricao, email, telefone, horario, pagina_url (contactos, opcionais), **ordem** (ordem na página inicial), ativo |
 | `categorias` | **servico_id** (responsável), nome, slug, descricao, ativo |
 | `temas` | **servico_id** (responsável), nome, slug, descricao, ativo |
 | `perguntas` | **servico_id** (responsável), origem_id e origem_versao (versão própria), pergunta, slug, resposta (HTML), resposta_texto (sem HTML, para a pesquisa), publicada, rever_ate (data de revisão, opcional) |
@@ -184,6 +184,7 @@ O URL guarda o caminho por onde a pessoa chegou:
 
 - **Validação da cadeia:** a categoria tem de pertencer ao serviço, o tema à categoria e a pergunta ao tema, e tudo tem de estar ativo/publicado. Caso contrário, a página dá 404 (ver `FaqController`).
 - A página da pergunta tem `<link rel="canonical">` para `/p/{pergunta}` e mostra **"Também aparece em"** com os outros caminhos.
+- **Contactos do serviço** (email, telefone, horário e endereço da página, todos opcionais): aparecem na página do serviço e, na página da pergunta, a quem responde "Não" a "Esta resposta foi útil?". Numa página com caminho são os do serviço desse caminho; em `/p/{pergunta}` são os do serviço responsável. A API inclui-os no campo `contactos` de cada serviço. Preenchem-se no backoffice, ao editar o serviço.
 - **"Atualizado em"** na página da pergunta (e `atualizado_em` na API) é a data da última versão do texto, por isso não muda ao alterar só o slug, a publicação ou a data de revisão.
 - **"Esta resposta foi útil?"** grava sim/não em `avaliacoes`, sem contas e sem cookies de rastreio. Há um limite de avaliações por minuto por IP (ver [Limites de pedidos](#limites-de-pedidos)).
 - **Pesquisa** na pergunta e na resposta (sem HTML). Os resultados aparecem enquanto se escreve. Cada pesquisa fica registada em `pesquisas` com o número de resultados, mas enquanto se escreve só é registada quando a pessoa pára 1,5 s (para não guardar "pro", "propi"…).

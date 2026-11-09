@@ -30,4 +30,11 @@
             </ul>
         @endif
     </section>
+
+    @if ($servico->temContactos())
+        <section class="servico-contactos" aria-labelledby="titulo-contactos">
+            <h2 id="titulo-contactos">Contactos</h2>
+            <x-contactos-servico :servico="$servico" />
+        </section>
+    @endif
 </x-layout>

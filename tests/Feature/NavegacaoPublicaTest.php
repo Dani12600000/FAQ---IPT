@@ -103,6 +103,24 @@ class NavegacaoPublicaTest extends TestCase
         $this->get('/p/como-me-candidato')->assertSee($canonico, false);
     }
 
+    public function test_a_pagina_do_servico_mostra_os_contactos_preenchidos(): void
+    {
+        $this->get('/acao-social')->assertDontSee('titulo-contactos', false);
+
+        $this->servico->update([
+            'email' => 'social@example.com',
+            'telefone' => '+351 200 000 000',
+            'horario' => 'Dias úteis, das 9h às 17h',
+            'pagina_url' => 'https://example.com/acao-social',
+        ]);
+
+        $this->get('/acao-social')
+            ->assertSee('mailto:social@example.com', false)
+            ->assertSee('tel:+351200000000', false)
+            ->assertSee('Dias úteis, das 9h às 17h')
+            ->assertSee('href="https://example.com/acao-social"', false);
+    }
+
     public function test_atualizado_em_so_muda_quando_muda_o_texto(): void
     {
         $this->travelTo('2026-03-10 12:00:00');

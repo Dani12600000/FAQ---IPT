@@ -26,6 +26,7 @@ class AvaliacaoController extends Controller
 
         return back()->with('avaliacao', [
             'pergunta' => $pergunta->id,
+            'util' => (bool) $dados['util'],
             'mensagem' => self::agradecimento($dados['util']),
         ]);
     }

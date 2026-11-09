@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-#[Fillable(['nome', 'slug', 'descricao', 'ordem', 'ativo'])]
+#[Fillable(['nome', 'slug', 'descricao', 'email', 'telefone', 'horario', 'pagina_url', 'ordem', 'ativo'])]
 class Servico extends Model
 {
     /**
@@ -23,6 +23,14 @@ class Servico extends Model
         static::creating(function (self $servico): void {
             $servico->ordem ??= static::max('ordem') + 1;
         });
+    }
+
+    /**
+     * Se tem pelo menos um contacto preenchido.
+     */
+    public function temContactos(): bool
+    {
+        return filled($this->email) || filled($this->telefone) || filled($this->horario) || filled($this->pagina_url);
     }
 
     /**

@@ -689,6 +689,36 @@ main:focus {
     color: var(--cor-texto-suave);
 }
 
+.servico-contactos {
+    margin-top: 2.5rem;
+}
+
+.avaliacao-ajuda {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--cor-borda);
+}
+
+.avaliacao-ajuda p {
+    margin: 0 0 0.75rem;
+}
+
+.contactos {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0;
+}
+
+.contactos dt {
+    font-size: 0.875rem;
+    color: var(--cor-texto-suave);
+}
+
+.contactos dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
 .avaliacao {
     max-width: var(--largura-texto);
     margin-top: 2.5rem;

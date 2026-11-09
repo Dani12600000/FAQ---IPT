@@ -26,6 +26,13 @@ class ServicoResource extends JsonResource
             'descricao' => $this->descricao,
             'ordem' => $this->ordem,
             'url' => route('faq.servico', $this->slug),
+            // Contactos opcionais do serviço (null quando não estão preenchidos).
+            'contactos' => [
+                'email' => $this->email,
+                'telefone' => $this->telefone,
+                'horario' => $this->horario,
+                'pagina_url' => $this->pagina_url,
+            ],
             'categorias' => CategoriaResource::collection($this->whenLoaded('categorias')),
         ];
     }

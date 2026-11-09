@@ -49,7 +49,7 @@
                 @endif
             </article>
 
-            <x-avaliacao :pergunta="$pergunta" />
+            <x-avaliacao :pergunta="$pergunta" :servico="$servicoContactos" />
         </div>
 
         @if ($outrosCaminhos->isNotEmpty())
