@@ -15,7 +15,7 @@ class Servico extends Model
      * Endereços de primeiro nível usados pelo próprio site. Um serviço não pode ter
      * um destes slugs, porque o URL /{servico} ficaria tapado por eles.
      */
-    public const SLUGS_RESERVADOS = ['admin', 'api', 'p', 'pesquisa', 'up', 'livewire', 'storage', 'css', 'js', 'fonts', 'filament', 'docs'];
+    public const SLUGS_RESERVADOS = ['admin', 'api', 'p', 'pesquisa', 'up', 'livewire', 'storage', 'css', 'js', 'fonts', 'filament', 'docs', 'sitemap.xml', 'robots.txt'];
 
     protected static function booted(): void
     {

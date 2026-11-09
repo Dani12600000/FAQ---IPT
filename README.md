@@ -189,10 +189,11 @@ O URL guarda o caminho por onde a pessoa chegou:
 - **"Esta resposta foi útil?"** grava sim/não em `avaliacoes`, sem contas e sem cookies de rastreio. Há um limite de avaliações por minuto por IP (ver [Limites de pedidos](#limites-de-pedidos)).
 - **Pesquisa** na pergunta e na resposta (sem HTML). Os resultados aparecem enquanto se escreve. Cada pesquisa fica registada em `pesquisas` com o número de resultados, mas enquanto se escreve só é registada quando a pessoa pára 1,5 s (para não guardar "pro", "propi"…).
 - **schema.org FAQPage** (JSON-LD) nas páginas de tema e de pergunta.
+- **`/sitemap.xml` e `/robots.txt`** são gerados pelo `SitemapController`: o mapa tem os serviços, categorias e temas ativos e as perguntas publicadas (estas só pelo URL canónico `/p/{pergunta}`). O endereço usado é o do pedido, por isso `APP_URL` não precisa de ser alterado para isto. Não deve existir um `public/robots.txt`, porque o servidor web serviria esse ficheiro em vez da rota.
 - **Sem JavaScript tudo funciona:** a pesquisa envia o formulário e o "foi útil?" recarrega a página.
 - **Acessibilidade:** ligação "Saltar para o conteúdo", foco visível, acordeão com `<details>` (funciona com teclado), número de resultados anunciado aos leitores de ecrã e contraste AA.
 
-**Slugs reservados:** como `/{servico}` ocupa o primeiro nível do endereço, um serviço não pode ter o slug `admin`, `api`, `p`, `pesquisa`, `up`, `livewire`, `storage`, `css`, `js`, `fonts`, `filament` ou `docs`. O backoffice recusa estes slugs (lista em `Servico::SLUGS_RESERVADOS`). Se se criar uma nova rota de primeiro nível em `routes/web.php`, é preciso acrescentá-la a essa lista.
+**Slugs reservados:** como `/{servico}` ocupa o primeiro nível do endereço, um serviço não pode ter o slug `admin`, `api`, `p`, `pesquisa`, `up`, `livewire`, `storage`, `css`, `js`, `fonts`, `filament`, `docs`, `sitemap.xml` ou `robots.txt`. O backoffice recusa estes slugs (lista em `Servico::SLUGS_RESERVADOS`). Se se criar uma nova rota de primeiro nível em `routes/web.php`, é preciso acrescentá-la a essa lista.
 
 ## Backoffice
 

@@ -3,6 +3,7 @@
 use App\Http\Controllers\AvaliacaoController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\PesquisaController;
+use App\Http\Controllers\SitemapController;
 use Dedoc\Scramble\Scramble;
 use Illuminate\Support\Facades\Route;
 
@@ -17,6 +18,10 @@ use Illuminate\Support\Facades\Route;
 // Documentação da API (Scramble): página interativa e especificação OpenAPI em JSON.
 Scramble::registerUiRoute('docs/api')->name('scramble.docs.ui');
 Scramble::registerJsonSpecificationRoute('docs/api.json')->name('scramble.docs.document');
+
+// Para os motores de busca.
+Route::get('/sitemap.xml', [SitemapController::class, 'sitemap'])->name('sitemap');
+Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
 
 Route::get('/', [FaqController::class, 'inicio'])->name('faq.inicio');
 Route::get('/pesquisa', PesquisaController::class)->name('faq.pesquisa');
